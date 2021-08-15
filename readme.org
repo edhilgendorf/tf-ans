@@ -6,7 +6,7 @@ https://www.terraform.io/downloads.html
 - Register account: https://portal.aws.amazon.com/gp/aws/developer/registration/index.html
 ** Create IAM User and Policies
 - IAM: https://console.aws.amazon.com/iam/home
-- Polcies: https://console.aws.amazon.com/iamv2/home?#/policies
+- Polcies: https://console.aws.amazon.com/iamv2/home?#/policiesC
 - IAM User: https://console.aws.amazon.com/iam/home#/users$new?step=details
   + programmatic (non-console)
   + attach existing policy
@@ -127,3 +127,23 @@ https://www.terraform.io/downloads.html
   ]
 }
 #+end_src
+* Configure Terraform Cloud
+- Regsiter account: https://app.terraform.io/signup/account?utm_source=terraform_io&utm_content=terraform_cloud_top_nav
+** Setup Terraform Cloud State
+- Create an organization
+- Create a Workspace from VCS Repository
+- Create a token and save in ~~/.terraform.d/credentials.tfrc.json~
+  - https://app.terraform.io/app/settings/tokens
+- Create Terraform Backend config locally:
+  #+begin_src json
+  terraform {
+    backend "remote" {
+      organization = "hilgendorfdotme"
+      workspaces {
+        name ="tf-ans"
+      }
+    }
+  #  required_version = ">= 0.14.9"
+  }
+  #+end_src
+- Initialize your environment ~terraform init~
