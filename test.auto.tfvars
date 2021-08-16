@@ -1,5 +1,1 @@
-variable "test" {
-  type = string
-  default = "catheadbiscuit"
-
-}
+test = "catheadbiscuit2"
