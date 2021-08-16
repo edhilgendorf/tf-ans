@@ -1,10 +1,12 @@
 #+TITLE: Notes
 
-* Install Terraform
+* Install Terraform :terraform:install:
 https://www.terraform.io/downloads.html
-* Configure AWS
+* Configure AWS :aws:
 - Register account: https://portal.aws.amazon.com/gp/aws/developer/registration/index.html
-** Create IAM User and Policies
+** Setup AWS CLI :cli:install:
+- https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html
+** Create IAM User and Policies :iam:
 - IAM: https://console.aws.amazon.com/iam/home
 - Polcies: https://console.aws.amazon.com/iamv2/home?#/policiesC
 - IAM User: https://console.aws.amazon.com/iam/home#/users$new?step=details
@@ -12,6 +14,10 @@ https://www.terraform.io/downloads.html
   + attach existing policy
 - Add user to ~/.aws/credentials~ as a profile:
  #+begin_src
+ [default]
+ aws_access_key=XXX
+ aws_secret_access_key=XXX
+
  [tf_user]
  aws_access_key=XXX
  aws_secret_access_key=XXX
