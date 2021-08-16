@@ -152,5 +152,7 @@ https://www.terraform.io/downloads.html
   #  required_version = ">= 0.14.9"
   }
   #+end_src
+- Add access keys to Terraform Cloud
+  - https://app.terraform.io/app/hilgendorfdotme/workspaces/tf-ans/variables
 - Initialize your environment ~terraform init~
 * test
