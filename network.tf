@@ -43,7 +43,7 @@ data "aws_availability_zones" "azs" {
 resource "aws_subnet" "subnet_1" {
   provider          = aws.region-master
   availability_zone = element(data.aws_availability_zones.azs.names, 0)
-  vpc_id            = aws_vpc_master.id
+  vpc_id            = aws_vpc.vpc_master.id
   cidr_block        = "10.0.1.0/24"
 }
 
@@ -51,7 +51,7 @@ resource "aws_subnet" "subnet_1" {
 resource "aws_subnet" "subnet_2" {
   provider          = aws.region-master
   availability_zone = element(data.aws_availability_zones.azs.names, 0)
-  vpc_id            = aws_vpc_master.id
+  vpc_id            = aws_vpc.vpc_master.id
   cidr_block        = "10.0.2.0/24"
 }
 
@@ -59,6 +59,6 @@ resource "aws_subnet" "subnet_2" {
 resource "aws_subnet" "subnet_1_origin" {
   provider          = aws.region-worker
   availability_zone = element(data.aws_availability_zones.azs.names, 0)
-  vpc_id            = aws_vpc_master_oregon.id
+  vpc_id            = aws_vpc.vpc_master_oregon.id
   cidr_block        = "192.168.1.0/24"
 }
