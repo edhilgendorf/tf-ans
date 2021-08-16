@@ -1,6 +1,6 @@
 variable "profile" {
   type    = string
-  default = "default"
+  default = "tf_user"
 }
 
 variable "region-master" {

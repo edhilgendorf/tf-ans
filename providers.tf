@@ -1,7 +1,7 @@
 provider "aws" {
   profile = var.profile
   region  = var.region-master
-  shared_credentials_file = "/home/edward/.aws/credentials"
+  shared_credentials_file = "~/.aws/credentials"
   alias   = "region-master"
 }
 
