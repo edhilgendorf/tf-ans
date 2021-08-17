@@ -56,7 +56,7 @@ resource "aws_subnet" "subnet_2" {
 }
 
 #create subnet #1 in us-west-2
-resource "aws_subnet" "subnet_1_origin" {
+resource "aws_subnet" "subnet_1_oregon" {
   provider          = aws.region-worker
   availability_zone = element(data.aws_availability_zones.azs.names, 0)
   vpc_id            = aws_vpc.vpc_master_oregon.id
