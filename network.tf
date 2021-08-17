@@ -39,6 +39,7 @@ data "aws_availability_zones" "azs" {
   state    = "available"
 }
 
+
 #create subnet #1 in us-east-1
 resource "aws_subnet" "subnet_1" {
   provider          = aws.region-master
