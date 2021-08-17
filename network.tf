@@ -20,7 +20,6 @@ resource "aws_vpc" "vpc_master_oregon" {
   }
 }
 
-
 #Create IGW in us-east-1
 resource "aws_internet_gateway" "igw" {
   provider = aws.region-master
@@ -38,7 +37,6 @@ data "aws_availability_zones" "azs" {
   provider = aws.region-master
   state    = "available"
 }
-
 
 #create subnet #1 in us-east-1
 resource "aws_subnet" "subnet_1" {
@@ -58,7 +56,7 @@ resource "aws_subnet" "subnet_2" {
 
 #create subnet #1 in us-west-2
 resource "aws_subnet" "subnet_1_oregon" {
-  provider          = aws.region-worker
-  vpc_id            = aws_vpc.vpc_master_oregon.id
-  cidr_block        = "192.168.1.0/24"
+  provider   = aws.region-worker
+  vpc_id     = aws_vpc.vpc_master_oregon.id
+  cidr_block = "192.168.1.0/24"
 }

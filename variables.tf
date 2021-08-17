@@ -14,6 +14,6 @@ variable "region-worker" {
 }
 
 variable "test" {
-  type = string
+  type    = string
   default = "catheadbiscuit"
 }
