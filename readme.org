@@ -28,13 +28,13 @@ https://www.terraform.io/downloads.html
  #+end_src
 - Add root user as default, or create IAM admin:
   https://console.aws.amazon.com/iam/home?region=us-east-1#/security_credentials$access_key
-*** base policy
+*** attach a base policy :policy:
 [[./policies/base.json]]
 * Configure Terraform Cloud
 - Regsiter account: https://app.terraform.io/signup/account?utm_source=terraform_io&utm_content=terraform_cloud_top_nav
 ** Setup Terraform Cloud State
 - Create an organization
-- Create a Workspace from VCS Repository
+- Create a Workspace from VCS Repository, ex: https://github.com
 - Create a token and save in ~~/.terraform.d/credentials.tfrc.json~
   - https://app.terraform.io/app/settings/tokens
 - Create Terraform Backend config locally:
