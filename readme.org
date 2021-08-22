@@ -1,5 +1,9 @@
 #+TITLE: Notes
 
+* Conventions
+| type         | example      |
+|--------------+--------------|
+| custom input | <your_input> |
 * Install Terraform :terraform:install:
 https://www.terraform.io/downloads.html
 * Configure AWS :aws:
@@ -15,12 +19,12 @@ https://www.terraform.io/downloads.html
 - Add user to ~/.aws/credentials~ as a profile:
  #+begin_src
  [default]
- aws_access_key=XXX
- aws_secret_access_key=XXX
+ aws_access_key=<your_key>
+ aws_secret_access_key=<your_key>
 
  [tf_user]
- aws_access_key=XXX
- aws_secret_access_key=XXX
+ aws_access_key=<your_key>
+ aws_secret_access_key=<your_key>
  #+end_src
 - Add root user as default, or create IAM admin:
   https://console.aws.amazon.com/iam/home?region=us-east-1#/security_credentials$access_key
@@ -37,15 +41,13 @@ https://www.terraform.io/downloads.html
   #+begin_src json
   terraform {
     backend "remote" {
-      organization = "hilgendorfdotme"
+      organization = "<your_org>"
       workspaces {
-        name ="tf-ans"
+        name ="<your_workspace>"
       }
     }
-  #  required_version = ">= 0.14.9"
   }
   #+end_src
 - Add access keys to Terraform Cloud
-  - https://app.terraform.io/app/hilgendorfdotme/workspaces/tf-ans/variables
+  - https://app.terraform.io/app/<organization>/workspaces/<workspace>/variables
 - Initialize your environment ~terraform init~
-* test
