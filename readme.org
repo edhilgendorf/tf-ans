@@ -51,3 +51,15 @@ https://www.terraform.io/downloads.html
 - Add access keys to Terraform Cloud
   - https://app.terraform.io/app/<organization>/workspaces/<workspace>/variables
 - Initialize your environment ~terraform init~
+- Configure Terraform Cloud to plan and apply upon check-in
+  + https://app.terraform.io/app/<your_org>/workspaces/<your_workspace>/settings/general
+* Create Infrastructure with Terraform :terraform:iac:
+** Create variables :variables:
+- Input variables serve as parameters for a Terraform module, allowing aspects of the module to be customized without altering the module's own source code, and allowing modules to be shared between different configurations.
+  + https://www.terraform.io/docs/language/values/variables.html
+- [[./variables.tf]]
+** Create a network :network:
+*** Create VPCs :vpc:
+- A virtual network dedicated to your AWS account.
+  + https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html
+- [[./variables.tf]]
