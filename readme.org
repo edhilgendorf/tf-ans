@@ -1,4 +1,4 @@
-#+TITLE: Notes
+#+TITLE: Deploying a Web App with AWS, Terraform, Packer, Ansible and Jenkins
 #+OPTIONS: toc:2          (only include two levels in TOC)
 
 * Conventions
@@ -94,7 +94,7 @@ sudo apt-get update && sudo apt-get install packer
   + two subnets in the master VPC defined in [[*Create VPCs][Create VPCs]].
     - ~10.0.1.0/24~
     - ~10.0.2.0/24~
-  + one subnet in the worker VPC defined in [[*Create VPCs][Create VPCs]].
+  + one subnet in the worker VPC defined in  [[*Create VPCs][Create VPCs]].
     - ~192.168.1.0/24~
 *** Create Peering between VPCs :peering:
 - A VPC peering connection is a networking connection between two VPCs that enables you to route traffic between them using private IPv4 addresses or IPv6 addresses.
@@ -108,11 +108,11 @@ sudo apt-get update && sudo apt-get install packer
 - [[./network.tf]]
   + create a routing table for the master VPC
     - to internet via ~aws_internet_gateway.igw.id~
-    - to the worker VPC Peering Connection created in: [[*Create Peering between VPCs][Create Peering between VPCs]]
+    - to the worker VPC Peering Connection created in:  [[*Create Peering between VPCs][Create Peering between VPCs]]
   + replace default route of the master VPC with the routing table created above
   + create routing table for worker VPC
     - to internet via ~aws_internet_gateway.igw.id~
-    - to the master VPC Peering Connection created in: [[*Create Peering between VPCs][Create Peering between VPCs]]
+    - to the master VPC Peering Connection created in:  [[*Create Peering between VPCs][Create Peering between VPCs]]
   + replace default route of the worker VPC with the routing table created above
 *** Create Security Groups :security_groups:
 - A security group acts as a virtual firewall for your instance to control inbound and outbound traffic.
@@ -125,12 +125,12 @@ sudo apt-get update && sudo apt-get install packer
     - allow in from 80/443 web ports.
     - allow out anywhere for ephemeral ports.
     - allow ssh from port 22 from our home IP
-    - allow in from us-west-2 (worker) subnet created in [[*Create Subnets in our VPCs][Create Subnets in our VPCs]]
+    - allow in from us-west-2 (worker) subnet created in  [[*Create Subnets in our VPCs][Create Subnets in our VPCs]]
   + create a security group for Jenkins in VPC worker
     - allow in from 80/443 web ports.
     - allow out anywhere for ephemeral ports.
     - allow ssh from port 22 from our home IP
-    - allow in from us-east-1 (master) subnet created in [[*Create Subnets in our VPCs][Create Subnets in our VPCs]]
+    - allow in from us-east-1 (master) subnet created in  [[*Create Subnets in our VPCs][Create Subnets in our VPCs]]
 *** Create an ALB :alb:
 ** Create Instances
 *** Configure AMIs :ami:vm:
