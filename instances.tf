@@ -35,7 +35,7 @@ resource "aws_instance" "jenkins-master" {
   associate_public_ip_address = true
   vpc_security_group_ids      = [aws_security_group.jenkins-sg.id]
   subnet_id                   = aws_subnet.subnet_1.id
-#  user_data                   = data.template_file.user_data.rendered
+  user_data                   = data.template_file.user_data.rendered
   tags = {
     Name = "jenkins_master_tf"
   }
