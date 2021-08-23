@@ -7,6 +7,12 @@
 | custom input | <your_input> |
 * Install Terraform :terraform:install:
 https://www.terraform.io/downloads.html
+* Install Packer :packer:install:
+#+begin_src bash
+curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+sudo apt-get update && sudo apt-get install packer
+#+end_src
 * Configure AWS :aws:
 - Register account: https://portal.aws.amazon.com/gp/aws/developer/registration/index.html
 ** Setup AWS CLI :cli:install:
@@ -125,6 +131,8 @@ https://www.terraform.io/downloads.html
     - allow out anywhere for ephemeral ports.
     - allow ssh from port 22 from our home IP
     - allow in from us-east-1 (master) subnet created in [[*Create Subnets in our VPCs][Create Subnets in our VPCs]]
+*** Create an ALB :alb:
+** Create Instances
 *** Configure AMIs :ami:vm:
 - An Amazon Machine Image (AMI) provides the information required to launch an instance.
   + https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html
@@ -136,6 +144,4 @@ https://www.terraform.io/downloads.html
   + https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html
 - [[./instances.tf]]
   + create keypairs for each region
-*** Create EC2 Instances :ec2:
-
-*** Create an ALB :alb:
+*** Bootstrap EC2 Instances with Packer and Ansible :ansible:ec2:
