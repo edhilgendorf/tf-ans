@@ -108,3 +108,9 @@ https://www.terraform.io/downloads.html
     - to internet via ~aws_internet_gateway.igw.id~
     - to the master VPC Peering Connection created in: [[*Create Peering between VPCs][Create Peering between VPCs]]
   + replace default route of the worker VPC with the routing table created above
+*** Create Security Groups :security_groups:
+- A security group acts as a virtual firewall for your instance to control inbound and outbound traffic.
+  + https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html
+- [[./security_groups.tf]]
+  + create a SG for the: [[*Create an ALB][Create an ALB]]
+*** Create an ALB :alb:
