@@ -1,3 +1,4 @@
 packages:
   - python-pip
-  -vim
+  - vim
+  - tmux
