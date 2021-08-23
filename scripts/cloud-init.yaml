@@ -2,3 +2,10 @@ packages:
   - python-pip
   - vim
   - tmux
+
+
+users:
+  - default
+  - name: terraform
+    primary_group: hashicorp
+    groups: users, admin
