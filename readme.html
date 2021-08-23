@@ -1,0 +1,619 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2021-08-22 Sun 19:12 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Deploying a Web App with AWS, Terraform, Packer, Ansible and Jenkins</title>
+<meta name="author" content="edward" />
+<meta name="generator" content="Org Mode" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
+<!--/*--><![CDATA[/*><!--*/
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">Deploying a Web App with AWS, Terraform, Packer, Ansible and Jenkins</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgad93650">1. Conventions</a></li>
+<li><a href="#org5dc72f9">2. Install Terraform&#xa0;&#xa0;&#xa0;<span class="tag"><span class="terraform">terraform</span>&#xa0;<span class="install">install</span></span></a></li>
+<li><a href="#orga42419a">3. Install Packer&#xa0;&#xa0;&#xa0;<span class="tag"><span class="packer">packer</span>&#xa0;<span class="install">install</span></span></a></li>
+<li><a href="#orgee544fa">4. Configure AWS&#xa0;&#xa0;&#xa0;<span class="tag"><span class="aws">aws</span></span></a>
+<ul>
+<li><a href="#org3065622">4.1. Setup AWS CLI&#xa0;&#xa0;&#xa0;<span class="tag"><span class="cli">cli</span>&#xa0;<span class="install">install</span></span></a></li>
+<li><a href="#org82a4ef6">4.2. Create IAM User and Policies&#xa0;&#xa0;&#xa0;<span class="tag"><span class="iam">iam</span></span></a></li>
+</ul>
+</li>
+<li><a href="#org3ce8d17">5. Configure Terraform Cloud</a>
+<ul>
+<li><a href="#orgb0135d1">5.1. Setup Terraform Cloud State</a></li>
+</ul>
+</li>
+<li><a href="#org54e8c95">6. Create Infrastructure with Terraform&#xa0;&#xa0;&#xa0;<span class="tag"><span class="terraform">terraform</span>&#xa0;<span class="iac">iac</span></span></a>
+<ul>
+<li><a href="#org5f20fba">6.1. Create variables&#xa0;&#xa0;&#xa0;<span class="tag"><span class="variables">variables</span></span></a></li>
+<li><a href="#org3e12a41">6.2. Create a network&#xa0;&#xa0;&#xa0;<span class="tag"><span class="network">network</span></span></a></li>
+<li><a href="#org2504e2e">6.3. Create Instances</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgad93650" class="outline-2">
+<h2 id="orgad93650"><span class="section-number-2">1</span> Conventions</h2>
+<div class="outline-text-2" id="text-1">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">type</th>
+<th scope="col" class="org-left">example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">custom input</td>
+<td class="org-left">&lt;your<sub>input</sub>&gt;</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="outline-container-org5dc72f9" class="outline-2">
+<h2 id="org5dc72f9"><span class="section-number-2">2</span> Install Terraform&#xa0;&#xa0;&#xa0;<span class="tag"><span class="terraform">terraform</span>&#xa0;<span class="install">install</span></span></h2>
+<div class="outline-text-2" id="text-2">
+<p>
+<a href="https://www.terraform.io/downloads.html">https://www.terraform.io/downloads.html</a>
+</p>
+</div>
+</div>
+<div id="outline-container-orga42419a" class="outline-2">
+<h2 id="orga42419a"><span class="section-number-2">3</span> Install Packer&#xa0;&#xa0;&#xa0;<span class="tag"><span class="packer">packer</span>&#xa0;<span class="install">install</span></span></h2>
+<div class="outline-text-2" id="text-3">
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #ECBE7B;">curl</span> -fsSL https://apt.releases.hashicorp.com/gpg | <span style="color: #ECBE7B;">sudo</span> apt-key add -
+<span style="color: #ECBE7B;">sudo</span> apt-add-repository <span style="color: #98be65;">"deb [arch=amd64] https://apt.releases.hashicorp.com </span><span style="color: #51afef; font-weight: bold;">$(</span><span style="color: #51afef; font-weight: bold;">lsb_release</span><span style="color: #51afef; font-weight: bold;"> -cs)</span><span style="color: #98be65;"> main"</span>
+<span style="color: #ECBE7B;">sudo</span> apt-get update &amp;&amp; <span style="color: #ECBE7B;">sudo</span> apt-get install packer
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgee544fa" class="outline-2">
+<h2 id="orgee544fa"><span class="section-number-2">4</span> Configure AWS&#xa0;&#xa0;&#xa0;<span class="tag"><span class="aws">aws</span></span></h2>
+<div class="outline-text-2" id="text-4">
+<ul class="org-ul">
+<li>Register account: <a href="https://portal.aws.amazon.com/gp/aws/developer/registration/index.html">https://portal.aws.amazon.com/gp/aws/developer/registration/index.html</a></li>
+</ul>
+</div>
+<div id="outline-container-org3065622" class="outline-3">
+<h3 id="org3065622"><span class="section-number-3">4.1</span> Setup AWS CLI&#xa0;&#xa0;&#xa0;<span class="tag"><span class="cli">cli</span>&#xa0;<span class="install">install</span></span></h3>
+<div class="outline-text-3" id="text-4-1">
+<ul class="org-ul">
+<li><a href="https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html">https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org82a4ef6" class="outline-3">
+<h3 id="org82a4ef6"><span class="section-number-3">4.2</span> Create IAM User and Policies&#xa0;&#xa0;&#xa0;<span class="tag"><span class="iam">iam</span></span></h3>
+<div class="outline-text-3" id="text-4-2">
+<ul class="org-ul">
+<li>IAM: <a href="https://console.aws.amazon.com/iam/home">https://console.aws.amazon.com/iam/home</a></li>
+<li>Polcies: <a href="https://console.aws.amazon.com/iamv2/home?#/policiesC">https://console.aws.amazon.com/iamv2/home?#/policiesC</a></li>
+<li>IAM User: <a href="https://console.aws.amazon.com/iam/home#/users$new?step=details">https://console.aws.amazon.com/iam/home#/users$new?step=details</a>
+<ul class="org-ul">
+<li>programmatic (non-console)</li>
+<li>attach existing policy</li>
+</ul></li>
+<li><p>
+Add user to <code>/.aws/credentials</code> as a profile:
+</p>
+<pre class="example">
+ [default]
+ aws_access_key=&lt;your_key&gt;
+ aws_secret_access_key=&lt;your_key&gt;
+
+ [tf_user]
+ aws_access_key=&lt;your_key&gt;
+ aws_secret_access_key=&lt;your_key&gt;
+</pre></li>
+<li>Add root user as default, or create IAM admin:
+<a href="https://console.aws.amazon.com/iam/home?region=us-east-1#/security_credentials$access_key">https://console.aws.amazon.com/iam/home?region=us-east-1#/security_credentials$access_key</a></li>
+</ul>
+</div>
+<div id="outline-container-org1f97a25" class="outline-4">
+<h4 id="org1f97a25"><span class="section-number-4">4.2.1</span> attach a base policy&#xa0;&#xa0;&#xa0;<span class="tag"><span class="policy">policy</span></span></h4>
+<div class="outline-text-4" id="text-4-2-1">
+<p>
+<a href="./policies/base.json">./policies/base.json</a>
+</p>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org3ce8d17" class="outline-2">
+<h2 id="org3ce8d17"><span class="section-number-2">5</span> Configure Terraform Cloud</h2>
+<div class="outline-text-2" id="text-5">
+<ul class="org-ul">
+<li>Regsiter account: <a href="https://app.terraform.io/signup/account?utm_source=terraform_io&amp;utm_content=terraform_cloud_top_nav">https://app.terraform.io/signup/account?utm_source=terraform_io&amp;utm_content=terraform_cloud_top_nav</a></li>
+</ul>
+</div>
+<div id="outline-container-orgb0135d1" class="outline-3">
+<h3 id="orgb0135d1"><span class="section-number-3">5.1</span> Setup Terraform Cloud State</h3>
+<div class="outline-text-3" id="text-5-1">
+<ul class="org-ul">
+<li>Create an organization</li>
+<li>Create a Workspace from VCS Repository, ex: <a href="https://github.com">https://github.com</a></li>
+<li>Create a token and save in <code>~/.terraform.d/credentials.tfrc.json</code>
+<ul class="org-ul">
+<li><a href="https://app.terraform.io/app/settings/tokens">https://app.terraform.io/app/settings/tokens</a></li>
+</ul></li>
+<li><p>
+Create Terraform Backend config locally:
+</p>
+<div class="org-src-container">
+<pre class="src src-json">  terraform {
+    backend "remote" {
+      organization = "&lt;your_org&gt;"
+      workspaces {
+        name ="&lt;your_workspace&gt;"
+      }
+    }
+  }
+</pre>
+</div></li>
+<li>Add access keys to Terraform Cloud
+<ul class="org-ul">
+<li><a href="https://app.terraform.io/app/">https://app.terraform.io/app/</a>&lt;organization&gt;/workspaces/&lt;workspace&gt;/variables</li>
+</ul></li>
+<li>Initialize your environment <code>terraform init</code></li>
+<li>Configure Terraform Cloud to plan and apply upon check-in
+<ul class="org-ul">
+<li><a href="https://app.terraform.io/app/">https://app.terraform.io/app/</a>&lt;your<sub>org</sub>&gt;/workspaces/&lt;your<sub>workspace</sub>&gt;/settings/general</li>
+</ul></li>
+</ul>
+</div>
+</div>
+</div>
+<div id="outline-container-org54e8c95" class="outline-2">
+<h2 id="org54e8c95"><span class="section-number-2">6</span> Create Infrastructure with Terraform&#xa0;&#xa0;&#xa0;<span class="tag"><span class="terraform">terraform</span>&#xa0;<span class="iac">iac</span></span></h2>
+<div class="outline-text-2" id="text-6">
+</div>
+<div id="outline-container-org5f20fba" class="outline-3">
+<h3 id="org5f20fba"><span class="section-number-3">6.1</span> Create variables&#xa0;&#xa0;&#xa0;<span class="tag"><span class="variables">variables</span></span></h3>
+<div class="outline-text-3" id="text-6-1">
+<ul class="org-ul">
+<li>Input variables serve as parameters for a Terraform module, allowing aspects of the module to be customized without altering the module&rsquo;s own source code, and allowing modules to be shared between different configurations.
+<ul class="org-ul">
+<li><a href="https://www.terraform.io/docs/language/values/variables.html">https://www.terraform.io/docs/language/values/variables.html</a></li>
+</ul></li>
+<li><a href="./variables.tf">./variables.tf</a>
+<ul class="org-ul">
+<li>profile and default user</li>
+<li>two regions
+<ul class="org-ul">
+<li>a master region</li>
+<li>a worker region</li>
+</ul></li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org3e12a41" class="outline-3">
+<h3 id="org3e12a41"><span class="section-number-3">6.2</span> Create a network&#xa0;&#xa0;&#xa0;<span class="tag"><span class="network">network</span></span></h3>
+<div class="outline-text-3" id="text-6-2">
+</div>
+<div id="outline-container-org698c9ac" class="outline-4">
+<h4 id="org698c9ac"><span class="section-number-4">6.2.1</span> Create VPCs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="vpc">vpc</span></span></h4>
+<div class="outline-text-4" id="text-6-2-1">
+<ul class="org-ul">
+<li>A virtual network dedicated to your AWS account.
+<ul class="org-ul">
+<li><a href="https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html">https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html</a></li>
+</ul></li>
+<li><a href="./network.tf">./network.tf</a>
+<ul class="org-ul">
+<li>VPCs
+<ul class="org-ul">
+<li>vpc<sub>master</sub></li>
+<li>vpc<sub>master</sub><sub>oregon</sub></li>
+</ul></li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orga5d557a" class="outline-4">
+<h4 id="orga5d557a"><span class="section-number-4">6.2.2</span> Create IGWs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="igw">igw</span></span></h4>
+<div class="outline-text-4" id="text-6-2-2">
+<ul class="org-ul">
+<li>An internet gateway is a horizontally scaled, redundant, and highly available VPC component that allows communication between your VPC and the internet.
+<ul class="org-ul">
+<li><a href="https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html">https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html</a></li>
+</ul></li>
+<li><a href="./network.tf">./network.tf</a>
+<ul class="org-ul">
+<li>create an internet gateway in each VPC, which reside in different availability zones (us-east-1 and us-west-2)</li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org93f232b" class="outline-4">
+<h4 id="org93f232b"><span class="section-number-4">6.2.3</span> Provide Data&#xa0;&#xa0;&#xa0;<span class="tag"><span class="data">data</span></span></h4>
+<div class="outline-text-4" id="text-6-2-3">
+<ul class="org-ul">
+<li>Data sources allow Terraform use information defined outside of Terraform, defined by another separate Terraform configuration, or modified by functions.
+<ul class="org-ul">
+<li><a href="https://www.terraform.io/docs/language/data-sources/index.html">https://www.terraform.io/docs/language/data-sources/index.html</a></li>
+</ul></li>
+<li><a href="./network.tf">./network.tf</a>
+<ul class="org-ul">
+<li>get <code>aws_availability_zones</code> that are in <code>state: available</code></li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org3783b74" class="outline-4">
+<h4 id="org3783b74"><span class="section-number-4">6.2.4</span> Create Subnets in our VPCs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="subnet">subnet</span></span></h4>
+<div class="outline-text-4" id="text-6-2-4">
+<ul class="org-ul">
+<li>When you create a VPC, you must specify a range of IPv4 addresses for the VPC in the form of a Classless Inter-Domain Routing (CIDR) block; for example, 10.0.0.0/16. This is the primary CIDR block for your VPC. For more information about CIDR notation, see RFC 4632.
+<ul class="org-ul">
+<li><a href="https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Subnets.html">https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Subnets.html</a></li>
+</ul></li>
+<li><a href="./network.tf">./network.tf</a>
+<ul class="org-ul">
+<li>two subnets in the master VPC defined in <a href="#org698c9ac">Create VPCs</a>.
+<ul class="org-ul">
+<li><code>10.0.1.0/24</code></li>
+<li><code>10.0.2.0/24</code></li>
+</ul></li>
+<li>one subnet in the worker VPC defined in  <a href="#org698c9ac">Create VPCs</a>.
+<ul class="org-ul">
+<li><code>192.168.1.0/24</code></li>
+</ul></li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgf3d4cb4" class="outline-4">
+<h4 id="orgf3d4cb4"><span class="section-number-4">6.2.5</span> Create Peering between VPCs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="peering">peering</span></span></h4>
+<div class="outline-text-4" id="text-6-2-5">
+<ul class="org-ul">
+<li>A VPC peering connection is a networking connection between two VPCs that enables you to route traffic between them using private IPv4 addresses or IPv6 addresses.
+<ul class="org-ul">
+<li><a href="https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html">https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html</a></li>
+</ul></li>
+<li><a href="./network.tf">./network.tf</a>
+<ul class="org-ul">
+<li>Create a peering connection request from the master VPC.</li>
+<li>Create a peering connection acceptor from the worker VPC.</li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org563389e" class="outline-4">
+<h4 id="org563389e"><span class="section-number-4">6.2.6</span> Create Routing in and between VPCs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="route">route</span>&#xa0;<span class="vpc">vpc</span></span></h4>
+<div class="outline-text-4" id="text-6-2-6">
+<ul class="org-ul">
+<li>A route table contains a set of rules, called routes, that are used to determine where network traffic from your subnet or gateway is directed.
+<ul class="org-ul">
+<li><a href="https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html">https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html</a></li>
+</ul></li>
+<li><a href="./network.tf">./network.tf</a>
+<ul class="org-ul">
+<li>create a routing table for the master VPC
+<ul class="org-ul">
+<li>to internet via <code>aws_internet_gateway.igw.id</code></li>
+<li>to the worker VPC Peering Connection created in:  <a href="#orgf3d4cb4">Create Peering between VPCs</a></li>
+</ul></li>
+<li>replace default route of the master VPC with the routing table created above</li>
+<li>create routing table for worker VPC
+<ul class="org-ul">
+<li>to internet via <code>aws_internet_gateway.igw.id</code></li>
+<li>to the master VPC Peering Connection created in:  <a href="#orgf3d4cb4">Create Peering between VPCs</a></li>
+</ul></li>
+<li>replace default route of the worker VPC with the routing table created above</li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgaeaa3cf" class="outline-4">
+<h4 id="orgaeaa3cf"><span class="section-number-4">6.2.7</span> Create Security Groups&#xa0;&#xa0;&#xa0;<span class="tag"><span class="security_groups">security_groups</span></span></h4>
+<div class="outline-text-4" id="text-6-2-7">
+<ul class="org-ul">
+<li>A security group acts as a virtual firewall for your instance to control inbound and outbound traffic.
+<ul class="org-ul">
+<li><a href="https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html">https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html</a></li>
+</ul></li>
+<li><a href="./security_groups.tf">./security_groups.tf</a>
+<ul class="org-ul">
+<li>create a SG for the: <a href="#orga0f230b">Create an ALB</a>
+<ul class="org-ul">
+<li>allow in from 80/443 web ports.</li>
+<li>allow out anywhere for ephemeral ports.</li>
+</ul></li>
+<li>create a security group for Jenkins in VPC Master
+<ul class="org-ul">
+<li>allow in from 80/443 web ports.</li>
+<li>allow out anywhere for ephemeral ports.</li>
+<li>allow ssh from port 22 from our home IP</li>
+<li>allow in from us-west-2 (worker) subnet created in  <a href="#org3783b74">Create Subnets in our VPCs</a></li>
+</ul></li>
+<li>create a security group for Jenkins in VPC worker
+<ul class="org-ul">
+<li>allow in from 80/443 web ports.</li>
+<li>allow out anywhere for ephemeral ports.</li>
+<li>allow ssh from port 22 from our home IP</li>
+<li>allow in from us-east-1 (master) subnet created in  <a href="#org3783b74">Create Subnets in our VPCs</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orga0f230b" class="outline-4">
+<h4 id="orga0f230b"><span class="section-number-4">6.2.8</span> Create an ALB&#xa0;&#xa0;&#xa0;<span class="tag"><span class="alb">alb</span></span></h4>
+</div>
+</div>
+<div id="outline-container-org2504e2e" class="outline-3">
+<h3 id="org2504e2e"><span class="section-number-3">6.3</span> Create Instances</h3>
+<div class="outline-text-3" id="text-6-3">
+</div>
+<div id="outline-container-org76134de" class="outline-4">
+<h4 id="org76134de"><span class="section-number-4">6.3.1</span> Configure AMIs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="ami">ami</span>&#xa0;<span class="vm">vm</span></span></h4>
+<div class="outline-text-4" id="text-6-3-1">
+<ul class="org-ul">
+<li>An Amazon Machine Image (AMI) provides the information required to launch an instance.
+<ul class="org-ul">
+<li><a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html">https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html</a></li>
+</ul></li>
+<li><a href="./instances.tf">./instances.tf</a>
+<ul class="org-ul">
+<li>data
+<ul class="org-ul">
+<li>get the AMI names for the latest Amazon Linux AMI</li>
+</ul></li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org56f84a6" class="outline-4">
+<h4 id="org56f84a6"><span class="section-number-4">6.3.2</span> Configure SSH keypairs for AMI VMs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="keypair">keypair</span></span></h4>
+<div class="outline-text-4" id="text-6-3-2">
+<ul class="org-ul">
+<li>A key pair, consisting of a public key and a private key, is a set of security credentials that you use to prove your identity when connecting to an Amazon EC2 instance. Amazon EC2 stores the public key on your instance, and you store the private key. For Linux instances, the private key allows you to securely SSH into your instance. Anyone who possesses your private key can connect to your instances, so it&rsquo;s important that you store your private key in a secure place.
+<ul class="org-ul">
+<li><a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html">https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html</a></li>
+</ul></li>
+<li><a href="./instances.tf">./instances.tf</a>
+<ul class="org-ul">
+<li>create keypairs for each region</li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgf665ec1" class="outline-4">
+<h4 id="orgf665ec1"><span class="section-number-4">6.3.3</span> Bootstrap EC2 Instances with Packer and Ansible&#xa0;&#xa0;&#xa0;<span class="tag"><span class="ansible">ansible</span>&#xa0;<span class="ec2">ec2</span></span></h4>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: edward</p>
+<p class="date">Created: 2021-08-22 Sun 19:12</p>
+</div>
+</body>
+</html>
