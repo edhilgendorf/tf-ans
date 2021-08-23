@@ -22,7 +22,6 @@ resource "aws_key_pair" "worker-key" {
   #public_key = file("~/.ssh/id_rsa.pub")
   public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDRLTIuUEFLRj7+PbhWbuWEigBKBk7ej2XNQCEyyvsLCU5ja1OlnnMnzhiVptlIK29WQ2+UiWC/pd+reN7tcsu3XWf4iVOjfxavBPFfZw8P0Ywk0lfaQAvPIjfbBfdF2NDNOTjWL8vL/S8xz6pE9FVwmHnXrQePPTn5i54yotk7Am/Vf+edNzG/dnHuUTJRkiKKsy+akR+Zx7LuXi3m1bbCpuCGmlMowIX+Cjn4nQApycQla2qizKgj1/u6ViPc0cVBaVkSvWOdiQnTmThthIDEiCuBAcK+0rGtMnvwAfoJ8z+p2Lp0ajrPZU9YAKncTpKb/W245qNR9EAaHDderMB2++5lZHvbssEZOeWqeUstuAOvZv2Wdi+47bYZL5iYfUAiBWKricGAHGBHmtAausuwCiDfCjdkOu1CJI8oORH3KLjhWrR30y5eXs/mGQIqWlkBmGJvcHB+vvzlASD0IVfUbHI6Qs6Zdf/3foej8TLyBFEzQgYnBaQNoLNBgJ3uwjU= edward@fireside"
 }
-
 #Create and bootstrap EC2 in us-east-1
 resource "aws_instance" "jenkins-master" {
   provider                    = aws.region-master
@@ -32,14 +31,11 @@ resource "aws_instance" "jenkins-master" {
   associate_public_ip_address = true
   vpc_security_group_ids      = [aws_security_group.jenkins-sg.id]
   subnet_id                   = aws_subnet.subnet_1.id
-
   tags = {
     Name = "jenkins_master_tf"
   }
-
   depends_on = [aws_main_route_table_association.set-master-default-rt-assoc]
 }
-
 #Create EC2 in us-west-2
 resource "aws_instance" "jenkins-worker-oregon" {
   provider                    = aws.region-worker
@@ -50,7 +46,6 @@ resource "aws_instance" "jenkins-worker-oregon" {
   associate_public_ip_address = true
   vpc_security_group_ids      = [aws_security_group.jenkins-sg-oregon.id]
   subnet_id                   = aws_subnet.subnet_1_oregon.id
-
   tags = {
     Name = join("_", ["jenkins_worker_tf", count.index + 1])
   }
