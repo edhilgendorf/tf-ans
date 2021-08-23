@@ -125,13 +125,17 @@ https://www.terraform.io/downloads.html
     - allow out anywhere for ephemeral ports.
     - allow ssh from port 22 from our home IP
     - allow in from us-east-1 (master) subnet created in [[*Create Subnets in our VPCs][Create Subnets in our VPCs]]
-*** Configure AMIs for VMs :ami:vm:
+*** Configure AMIs :ami:vm:
 - An Amazon Machine Image (AMI) provides the information required to launch an instance.
   + https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html
 - [[./instances.tf]]
   + data
     - get the AMI names for the latest Amazon Linux AMI
-*** Configure SSH keypairs for AMI VMs
+*** Configure SSH keypairs for AMI VMs :keypair:
 - A key pair, consisting of a public key and a private key, is a set of security credentials that you use to prove your identity when connecting to an Amazon EC2 instance. Amazon EC2 stores the public key on your instance, and you store the private key. For Linux instances, the private key allows you to securely SSH into your instance. Anyone who possesses your private key can connect to your instances, so it's important that you store your private key in a secure place.
   + https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html
+- [[./instances.tf]]
+  + create keypairs for each region
+*** Create EC2 Instances :ec2:
+
 *** Create an ALB :alb:
