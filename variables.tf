@@ -17,7 +17,7 @@ variable "test" {
   type    = string
   default = "catheadbiscuit"
 }
-
+#Replace with <YOUR_EXTERNAL_IP>  https://ipv4.icanhazip.com
 variable "external_ip" {
   type    = string
   default = "0.0.0.0/0"
