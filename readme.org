@@ -144,4 +144,5 @@ sudo apt-get update && sudo apt-get install packer
   + https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html
 - [[./instances.tf]]
   + create keypairs for each region
-*** Bootstrap EC2 Instances with Packer and Ansible :ansible:ec2:
+*** Bootstrap EC2 Instances with cloud-init :ansible:ec2:
+- https://cloudinit.readthedocs.io/en/latest/topics/examples.html
