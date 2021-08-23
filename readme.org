@@ -103,3 +103,8 @@ https://www.terraform.io/downloads.html
   + create a routing table for the master VPC
     - to internet via ~aws_internet_gateway.igw.id~
     - to the worker VPC Peering Connection created in: [[*Create Peering between VPCs][Create Peering between VPCs]]
+  + replace default route of the master VPC with the routing table created above
+  + create routing table for worker VPC
+    - to internet via ~aws_internet_gateway.igw.id~
+    - to the master VPC Peering Connection created in: [[*Create Peering between VPCs][Create Peering between VPCs]]
+  + replace default route of the worker VPC with the routing table created above
