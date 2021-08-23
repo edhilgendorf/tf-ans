@@ -1,4 +1,5 @@
 #+TITLE: Notes
+#+OPTIONS: toc:2          (only include two levels in TOC)
 
 * Conventions
 | type         | example      |
@@ -58,8 +59,47 @@ https://www.terraform.io/downloads.html
 - Input variables serve as parameters for a Terraform module, allowing aspects of the module to be customized without altering the module's own source code, and allowing modules to be shared between different configurations.
   + https://www.terraform.io/docs/language/values/variables.html
 - [[./variables.tf]]
+  + profile and default user
+  + two regions
+    - a master region
+    - a worker region
 ** Create a network :network:
 *** Create VPCs :vpc:
 - A virtual network dedicated to your AWS account.
   + https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html
-- [[./variables.tf]]
+- [[./network.tf]]
+  + VPCs
+    - vpc_master
+    - vpc_master_oregon
+*** Create IGWs :igw:
+- An internet gateway is a horizontally scaled, redundant, and highly available VPC component that allows communication between your VPC and the internet.
+  + https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
+- [[./network.tf]]
+  + create an internet gateway in each VPC, which reside in different availability zones (us-east-1 and us-west-2)
+*** Provide Data :data:
+- Data sources allow Terraform use information defined outside of Terraform, defined by another separate Terraform configuration, or modified by functions.
+  + https://www.terraform.io/docs/language/data-sources/index.html
+- [[./network.tf]]
+  + get ~aws_availability_zones~ that are in ~state: available~
+*** Create Subnets in our VPCs :subnet:
+- When you create a VPC, you must specify a range of IPv4 addresses for the VPC in the form of a Classless Inter-Domain Routing (CIDR) block; for example, 10.0.0.0/16. This is the primary CIDR block for your VPC. For more information about CIDR notation, see RFC 4632.
+  + https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Subnets.html
+- [[./network.tf]]
+  + two subnets in the master VPC defined in [[*Create VPCs][Create VPCs]].
+    - ~10.0.1.0/24~
+    - ~10.0.2.0/24~
+  + one subnet in the worker VPC defined in [[*Create VPCs][Create VPCs]].
+    - ~192.168.1.0/24~
+*** Create Peering between VPCs :peering:
+- A VPC peering connection is a networking connection between two VPCs that enables you to route traffic between them using private IPv4 addresses or IPv6 addresses.
+  + https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html
+- [[./network.tf]]
+  + Create a peering connection request from the master VPC.
+  + Create a peering connection acceptor from the worker VPC.
+*** Create Routing in and between VPCs :route:vpc:
+- A route table contains a set of rules, called routes, that are used to determine where network traffic from your subnet or gateway is directed.
+  + https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html
+- [[./network.tf]]
+  + create a routing table for the master VPC
+    - to internet via ~aws_internet_gateway.igw.id~
+    - to the worker VPC Peering Connection created in: [[*Create Peering between VPCs][Create Peering between VPCs]]
