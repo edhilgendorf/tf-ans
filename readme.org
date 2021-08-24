@@ -1,4 +1,4 @@
-#+TITLE: Deploying a Web App with AWS, Terraform, Packer, Ansible and Jenkins
+#+TITLE: Deploying a Web App with AWS, Terraform, Cloud-init, Ansible and Jenkins
 #+OPTIONS: toc:2          (only include two levels in TOC)
 
 * Conventions
