@@ -1,5 +1,7 @@
-users:
-  - default
-  - name: terraform
-    primary_group: hashicorp
-    groups: users, admin
+#cloud-config
+package_update: true
+package_upgrade: true
+packages: ['awscli']
+
+runcmd:
+  - aws --version
