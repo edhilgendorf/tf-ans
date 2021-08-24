@@ -5,3 +5,4 @@ packages: ['awscli']
 
 runcmd:
   - aws --version
+  - echo "testing 1 two three"
