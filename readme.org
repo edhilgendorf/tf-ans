@@ -4,10 +4,10 @@
 * Conventions
 | type         | example      |
 |--------------+--------------|
-| custom input | <your_input> |
+| ~custom input~ | ~<your_input>~ |
 * Install Terraform :terraform:install:
 https://www.terraform.io/downloads.html
-* Install Packer :packer:install:
+* Install Packer -- (Unused in this project, at this time) :packer:install:
 #+begin_src bash
 curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
 sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
@@ -64,11 +64,52 @@ sudo apt-get update && sudo apt-get install packer
 ** Create variables :variables:
 - Input variables serve as parameters for a Terraform module, allowing aspects of the module to be customized without altering the module's own source code, and allowing modules to be shared between different configurations.
   + https://www.terraform.io/docs/language/values/variables.html
-- [[./variables.tf]]
-  + profile and default user
-  + two regions
-    - a master region
-    - a worker region
+- profile and default user
+- two regions
+  - a master region
+  - a worker region
+- external_ip (yours)
+- workers_count (how many instances to create)
+- instance type
+*** [[./variables.tf]]
+:PROPERTIES:
+:header-args: :tangle variables.tf
+:END:
+#+begin_src js
+variable "profile" {
+  type    = string
+  default = "tf_user"
+}
+
+variable "region-master" {
+  type    = string
+  default = "us-east-1"
+}
+
+variable "region-worker" {
+  type    = string
+  default = "us-west-2"
+}
+
+variable "test" {
+  type    = string
+  default = "catheadbiscuit"
+}
+#Replace with <YOUR_EXTERNAL_IP>  https://ipv4.icanhazip.com
+variable "external_ip" {
+  type    = string
+  default = "0.0.0.0/0"
+}
+variable "workers-count" {
+  type    = number
+  default = 1
+}
+variable "instance-type" {
+  type    = string
+  default = "t3.micro"
+}
+#+end_src
+
 ** Create a network :network:
 *** Create VPCs :vpc:
 - A virtual network dedicated to your AWS account.
