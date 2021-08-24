@@ -147,3 +147,8 @@ sudo apt-get update && sudo apt-get install packer
 *** Bootstrap EC2 Instances with cloud-init :ansible:ec2:
 - https://cloudinit.readthedocs.io/en/latest/topics/examples.html
 * Bootstrap EC2 with cloud-init :cloudinit:
+- https://cloudinit.readthedocs.io/en/latest/
+- [[./cloud-init.yaml]]
+  + install software
+  + create users
+  + jenkins-master will also be ansible master
