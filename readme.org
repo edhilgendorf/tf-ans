@@ -601,4 +601,3 @@ runcmd:
 #+begin_src sh
 ssh -o StrictHostKeyChecking=no ec2-user@$(terraform output -json | jq  -r '."Jenkins-Main-Node-Public-IP"."value"') "sudo grep 'testing 1' /var/log/cloud-init-output.log"
 #+end_src
-* Test terraform ignore readme files
