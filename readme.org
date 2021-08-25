@@ -203,8 +203,8 @@ resource "aws_vpc" "vpc_master_oregon" {
   + https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
 **** [[./network.tf]]
 :PROPERTIES:
-  :header-args: :tangle network.tf
-  :END:
+:header-args: :tangle network.tf
+:END:
 + create an internet gateway in each VPC, which reside in different availability zones (us-east-1 and us-west-2)
 #+begin_src js
 #Create IGW in us-east-1
@@ -366,7 +366,7 @@ resource "aws_main_route_table_association" "set-worker-default-rt-assoc" {
 :PROPERTIES:
 :header-args: :tangle security_groups.tf
 :END:
-+ create a SG for the: [[*Create an ALB][Create an ALB]]
++ create a SG for the: TODO Application Load Balancer TODO
   - allow in from 80/443 web ports.
   - allow out anywhere for ephemeral ports.
 + create a security group for Jenkins in VPC Master
@@ -589,4 +589,8 @@ runcmd:
   - aws --version
   - echo "testing 1 two three"
 
+#+end_src
+* Verify your instance up to this point:
+#+begin_src sh
+ssh ec2-user@$(terraform output -json | jq  -r '."Jenkins-Main-Node-Public-IP"."value"') "grep "testing 1" /var/log/cloud-init-output.log"
 #+end_src

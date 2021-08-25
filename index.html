@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-24 Tue 20:36 -->
+<!-- 2021-08-24 Tue 20:41 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Deploying a Web App with AWS, Terraform, Cloud-init, Ansible and Jenkins</title>
@@ -229,51 +229,52 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org564048a">1. The project</a>
+<li><a href="#org067f756">1. The project</a>
 <ul>
-<li><a href="#org7d242a3">1.1. This Document</a></li>
+<li><a href="#org4169e7e">1.1. This Document</a></li>
 </ul>
 </li>
-<li><a href="#org3e2a021">2. Conventions</a>
+<li><a href="#org9f23f9d">2. Conventions</a>
 <ul>
-<li><a href="#org5076b46">2.1. syntax</a></li>
-<li><a href="#orgfda39ad">2.2. Code Example</a></li>
+<li><a href="#orgb330aef">2.1. syntax</a></li>
+<li><a href="#org4cc5986">2.2. Code Example</a></li>
 </ul>
 </li>
-<li><a href="#orga22d4cf">3. Install Terraform&#xa0;&#xa0;&#xa0;<span class="tag"><span class="terraform">terraform</span>&#xa0;<span class="install">install</span></span></a></li>
-<li><a href="#orgc723c58">4. Install Packer &#x2013; (Unused in this project, at this time)&#xa0;&#xa0;&#xa0;<span class="tag"><span class="packer">packer</span>&#xa0;<span class="install">install</span></span></a></li>
-<li><a href="#orgae436e0">5. Configure AWS&#xa0;&#xa0;&#xa0;<span class="tag"><span class="aws">aws</span></span></a>
+<li><a href="#org5ccaa8f">3. Install Terraform&#xa0;&#xa0;&#xa0;<span class="tag"><span class="terraform">terraform</span>&#xa0;<span class="install">install</span></span></a></li>
+<li><a href="#org0de72c8">4. Install Packer &#x2013; (Unused in this project, at this time)&#xa0;&#xa0;&#xa0;<span class="tag"><span class="packer">packer</span>&#xa0;<span class="install">install</span></span></a></li>
+<li><a href="#org7a39242">5. Configure AWS&#xa0;&#xa0;&#xa0;<span class="tag"><span class="aws">aws</span></span></a>
 <ul>
-<li><a href="#org882a0bc">5.1. Setup AWS CLI&#xa0;&#xa0;&#xa0;<span class="tag"><span class="cli">cli</span>&#xa0;<span class="install">install</span></span></a></li>
-<li><a href="#org7839dc6">5.2. Create IAM User and Policies&#xa0;&#xa0;&#xa0;<span class="tag"><span class="iam">iam</span></span></a></li>
+<li><a href="#org650996a">5.1. Setup AWS CLI&#xa0;&#xa0;&#xa0;<span class="tag"><span class="cli">cli</span>&#xa0;<span class="install">install</span></span></a></li>
+<li><a href="#org8fc94c9">5.2. Create IAM User and Policies&#xa0;&#xa0;&#xa0;<span class="tag"><span class="iam">iam</span></span></a></li>
 </ul>
 </li>
-<li><a href="#orgfdbbb12">6. Configure Terraform Cloud</a>
+<li><a href="#org2a5efc2">6. Configure Terraform Cloud</a>
 <ul>
-<li><a href="#orgfad9d23">6.1. ./backend.tf</a></li>
+<li><a href="#org474c66c">6.1. ./backend.tf</a></li>
 </ul>
 </li>
-<li><a href="#org2ab3fad">7. Create Infrastructure with Terraform&#xa0;&#xa0;&#xa0;<span class="tag"><span class="terraform">terraform</span>&#xa0;<span class="iac">iac</span></span></a>
+<li><a href="#org244562c">7. Create Infrastructure with Terraform&#xa0;&#xa0;&#xa0;<span class="tag"><span class="terraform">terraform</span>&#xa0;<span class="iac">iac</span></span></a>
 <ul>
-<li><a href="#org0ae9ef5">7.1. Configure Providers</a></li>
-<li><a href="#org5d58949">7.2. Create variables&#xa0;&#xa0;&#xa0;<span class="tag"><span class="variables">variables</span></span></a></li>
-<li><a href="#orga60b5f1">7.3. Create a network&#xa0;&#xa0;&#xa0;<span class="tag"><span class="network">network</span></span></a></li>
-<li><a href="#org6198007">7.4. Create Instances</a></li>
+<li><a href="#orgf893638">7.1. Configure Providers</a></li>
+<li><a href="#org3853691">7.2. Create variables&#xa0;&#xa0;&#xa0;<span class="tag"><span class="variables">variables</span></span></a></li>
+<li><a href="#org0034cf1">7.3. Create a network&#xa0;&#xa0;&#xa0;<span class="tag"><span class="network">network</span></span></a></li>
+<li><a href="#org0c0ce19">7.4. Create Instances</a></li>
 </ul>
 </li>
-<li><a href="#orgeead65c">8. Bootstrap EC2 with cloud-init&#xa0;&#xa0;&#xa0;<span class="tag"><span class="cloudinit">cloudinit</span></span></a>
+<li><a href="#orga9ca361">8. Bootstrap EC2 with cloud-init&#xa0;&#xa0;&#xa0;<span class="tag"><span class="cloudinit">cloudinit</span></span></a>
 <ul>
-<li><a href="#org499ad85">8.1. ./scripts/cloud-init.yaml</a></li>
+<li><a href="#org5ff9b0a">8.1. ./scripts/cloud-init.yaml</a></li>
 </ul>
 </li>
+<li><a href="#orgfa82e7e">9. Verify your instance up to this point:</a></li>
 </ul>
 </div>
 </div>
 <p>
 See: <a href="https://edhilgendorf.github.io/tf-ans/">https://edhilgendorf.github.io/tf-ans/</a>
 </p>
-<div id="outline-container-org564048a" class="outline-2">
-<h2 id="org564048a"><span class="section-number-2">1</span> The project</h2>
+<div id="outline-container-org067f756" class="outline-2">
+<h2 id="org067f756"><span class="section-number-2">1</span> The project</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 Project is to use this repository ( and possibly a couple others ) to build and deploy a web application using some core technologies:
@@ -287,8 +288,8 @@ Project is to use this repository ( and possibly a couple others ) to build and 
 <li>An application <i>(TBD)</i></li>
 </ul>
 </div>
-<div id="outline-container-org7d242a3" class="outline-3">
-<h3 id="org7d242a3"><span class="section-number-3">1.1</span> This Document</h3>
+<div id="outline-container-org4169e7e" class="outline-3">
+<h3 id="org4169e7e"><span class="section-number-3">1.1</span> This Document</h3>
 <div class="outline-text-3" id="text-1-1">
 <p>
 Documentation and code are built into this same <a href="https://orgmode.org/">orgmode</a> document. All the code in this repository is created from snippets in this document via org-tangle. The process is as follows:
@@ -306,12 +307,12 @@ The purpose of this is to build a cloud based project using IaC that explains <b
 </div>
 </div>
 </div>
-<div id="outline-container-org3e2a021" class="outline-2">
-<h2 id="org3e2a021"><span class="section-number-2">2</span> Conventions</h2>
+<div id="outline-container-org9f23f9d" class="outline-2">
+<h2 id="org9f23f9d"><span class="section-number-2">2</span> Conventions</h2>
 <div class="outline-text-2" id="text-2">
 </div>
-<div id="outline-container-org5076b46" class="outline-3">
-<h3 id="org5076b46"><span class="section-number-3">2.1</span> syntax</h3>
+<div id="outline-container-orgb330aef" class="outline-3">
+<h3 id="orgb330aef"><span class="section-number-3">2.1</span> syntax</h3>
 <div class="outline-text-3" id="text-2-1">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -336,16 +337,16 @@ The purpose of this is to build a cloud based project using IaC that explains <b
 </table>
 </div>
 </div>
-<div id="outline-container-orgfda39ad" class="outline-3">
-<h3 id="orgfda39ad"><span class="section-number-3">2.2</span> Code Example</h3>
+<div id="outline-container-org4cc5986" class="outline-3">
+<h3 id="org4cc5986"><span class="section-number-3">2.2</span> Code Example</h3>
 <div class="outline-text-3" id="text-2-2">
 <ul class="org-ul">
 <li>Each block will be named as above</li>
 <li>Following will be bullet points with an explanation and <i>hopefully</i> a link to the corresponding resource</li>
 </ul>
 </div>
-<div id="outline-container-orgbc748ec" class="outline-4">
-<h4 id="orgbc748ec"><span class="section-number-4">2.2.1</span> <a href="./example_code.py">./example_code.py</a> &lt;&#x2013; the file that will be &ldquo;tangled&rdquo;, see <a href="#org7d242a3">This Document</a></h4>
+<div id="outline-container-org0c60025" class="outline-4">
+<h4 id="org0c60025"><span class="section-number-4">2.2.1</span> <a href="./example_code.py">./example_code.py</a> &lt;&#x2013; the file that will be &ldquo;tangled&rdquo;, see <a href="#org4169e7e">This Document</a></h4>
 <div class="outline-text-4" id="text-2-2-1">
 <ul class="org-ul">
 <li><p>
@@ -360,16 +361,16 @@ This prints &ldquo;hello world&rdquo; to the user on execution
 </div>
 </div>
 </div>
-<div id="outline-container-orga22d4cf" class="outline-2">
-<h2 id="orga22d4cf"><span class="section-number-2">3</span> Install Terraform&#xa0;&#xa0;&#xa0;<span class="tag"><span class="terraform">terraform</span>&#xa0;<span class="install">install</span></span></h2>
+<div id="outline-container-org5ccaa8f" class="outline-2">
+<h2 id="org5ccaa8f"><span class="section-number-2">3</span> Install Terraform&#xa0;&#xa0;&#xa0;<span class="tag"><span class="terraform">terraform</span>&#xa0;<span class="install">install</span></span></h2>
 <div class="outline-text-2" id="text-3">
 <p>
 <a href="https://www.terraform.io/downloads.html">https://www.terraform.io/downloads.html</a>
 </p>
 </div>
 </div>
-<div id="outline-container-orgc723c58" class="outline-2">
-<h2 id="orgc723c58"><span class="section-number-2">4</span> Install Packer &#x2013; (Unused in this project, at this time)&#xa0;&#xa0;&#xa0;<span class="tag"><span class="packer">packer</span>&#xa0;<span class="install">install</span></span></h2>
+<div id="outline-container-org0de72c8" class="outline-2">
+<h2 id="org0de72c8"><span class="section-number-2">4</span> Install Packer &#x2013; (Unused in this project, at this time)&#xa0;&#xa0;&#xa0;<span class="tag"><span class="packer">packer</span>&#xa0;<span class="install">install</span></span></h2>
 <div class="outline-text-2" id="text-4">
 <div class="org-src-container">
 <pre class="src src-bash"><span style="color: #ECBE7B;">curl</span> -fsSL https://apt.releases.hashicorp.com/gpg | <span style="color: #ECBE7B;">sudo</span> apt-key add -
@@ -379,23 +380,23 @@ This prints &ldquo;hello world&rdquo; to the user on execution
 </div>
 </div>
 </div>
-<div id="outline-container-orgae436e0" class="outline-2">
-<h2 id="orgae436e0"><span class="section-number-2">5</span> Configure AWS&#xa0;&#xa0;&#xa0;<span class="tag"><span class="aws">aws</span></span></h2>
+<div id="outline-container-org7a39242" class="outline-2">
+<h2 id="org7a39242"><span class="section-number-2">5</span> Configure AWS&#xa0;&#xa0;&#xa0;<span class="tag"><span class="aws">aws</span></span></h2>
 <div class="outline-text-2" id="text-5">
 <ul class="org-ul">
 <li>Register account: <a href="https://portal.aws.amazon.com/gp/aws/developer/registration/index.html">https://portal.aws.amazon.com/gp/aws/developer/registration/index.html</a></li>
 </ul>
 </div>
-<div id="outline-container-org882a0bc" class="outline-3">
-<h3 id="org882a0bc"><span class="section-number-3">5.1</span> Setup AWS CLI&#xa0;&#xa0;&#xa0;<span class="tag"><span class="cli">cli</span>&#xa0;<span class="install">install</span></span></h3>
+<div id="outline-container-org650996a" class="outline-3">
+<h3 id="org650996a"><span class="section-number-3">5.1</span> Setup AWS CLI&#xa0;&#xa0;&#xa0;<span class="tag"><span class="cli">cli</span>&#xa0;<span class="install">install</span></span></h3>
 <div class="outline-text-3" id="text-5-1">
 <ul class="org-ul">
 <li><a href="https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html">https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org7839dc6" class="outline-3">
-<h3 id="org7839dc6"><span class="section-number-3">5.2</span> Create IAM User and Policies&#xa0;&#xa0;&#xa0;<span class="tag"><span class="iam">iam</span></span></h3>
+<div id="outline-container-org8fc94c9" class="outline-3">
+<h3 id="org8fc94c9"><span class="section-number-3">5.2</span> Create IAM User and Policies&#xa0;&#xa0;&#xa0;<span class="tag"><span class="iam">iam</span></span></h3>
 <div class="outline-text-3" id="text-5-2">
 <ul class="org-ul">
 <li>IAM: <a href="https://console.aws.amazon.com/iam/home">https://console.aws.amazon.com/iam/home</a></li>
@@ -421,8 +422,8 @@ Add user to <code>/.aws/credentials</code> as a profile:
 <a href="https://console.aws.amazon.com/iam/home?region=us-east-1#/security_credentials$access_key">https://console.aws.amazon.com/iam/home?region=us-east-1#/security_credentials$access_key</a></li>
 </ul>
 </div>
-<div id="outline-container-org616c7c3" class="outline-4">
-<h4 id="org616c7c3"><span class="section-number-4">5.2.1</span> attach a base policy&#xa0;&#xa0;&#xa0;<span class="tag"><span class="policy">policy</span></span></h4>
+<div id="outline-container-org30a13a7" class="outline-4">
+<h4 id="org30a13a7"><span class="section-number-4">5.2.1</span> attach a base policy&#xa0;&#xa0;&#xa0;<span class="tag"><span class="policy">policy</span></span></h4>
 <div class="outline-text-4" id="text-5-2-1">
 <p>
 <a href="./policies/base.json">./policies/base.json</a>
@@ -431,8 +432,8 @@ Add user to <code>/.aws/credentials</code> as a profile:
 </div>
 </div>
 </div>
-<div id="outline-container-orgfdbbb12" class="outline-2">
-<h2 id="orgfdbbb12"><span class="section-number-2">6</span> Configure Terraform Cloud</h2>
+<div id="outline-container-org2a5efc2" class="outline-2">
+<h2 id="org2a5efc2"><span class="section-number-2">6</span> Configure Terraform Cloud</h2>
 <div class="outline-text-2" id="text-6">
 <ul class="org-ul">
 <li>Regsiter account: <a href="https://app.terraform.io/signup/account?utm_source=terraform_io&amp;utm_content=terraform_cloud_top_nav">https://app.terraform.io/signup/account?utm_source=terraform_io&amp;utm_content=terraform_cloud_top_nav</a></li>
@@ -454,8 +455,8 @@ Add user to <code>/.aws/credentials</code> as a profile:
 <li>setup a backend remote pointing to your org/workspace</li>
 </ul>
 </div>
-<div id="outline-container-orgfad9d23" class="outline-3">
-<h3 id="orgfad9d23"><span class="section-number-3">6.1</span> <a href="./backend.tf">./backend.tf</a></h3>
+<div id="outline-container-org474c66c" class="outline-3">
+<h3 id="org474c66c"><span class="section-number-3">6.1</span> <a href="./backend.tf">./backend.tf</a></h3>
 <div class="outline-text-3" id="text-6-1">
 <div class="org-src-container">
 <pre class="src src-json">terraform {
@@ -471,16 +472,16 @@ Add user to <code>/.aws/credentials</code> as a profile:
 </div>
 </div>
 </div>
-<div id="outline-container-org2ab3fad" class="outline-2">
-<h2 id="org2ab3fad"><span class="section-number-2">7</span> Create Infrastructure with Terraform&#xa0;&#xa0;&#xa0;<span class="tag"><span class="terraform">terraform</span>&#xa0;<span class="iac">iac</span></span></h2>
+<div id="outline-container-org244562c" class="outline-2">
+<h2 id="org244562c"><span class="section-number-2">7</span> Create Infrastructure with Terraform&#xa0;&#xa0;&#xa0;<span class="tag"><span class="terraform">terraform</span>&#xa0;<span class="iac">iac</span></span></h2>
 <div class="outline-text-2" id="text-7">
 </div>
-<div id="outline-container-org0ae9ef5" class="outline-3">
-<h3 id="org0ae9ef5"><span class="section-number-3">7.1</span> Configure Providers</h3>
+<div id="outline-container-orgf893638" class="outline-3">
+<h3 id="orgf893638"><span class="section-number-3">7.1</span> Configure Providers</h3>
 <div class="outline-text-3" id="text-7-1">
 </div>
-<div id="outline-container-orgc2bd3ec" class="outline-4">
-<h4 id="orgc2bd3ec"><span class="section-number-4">7.1.1</span> <a href="./providers.tf">./providers.tf</a></h4>
+<div id="outline-container-org0cd4401" class="outline-4">
+<h4 id="org0cd4401"><span class="section-number-4">7.1.1</span> <a href="./providers.tf">./providers.tf</a></h4>
 <div class="outline-text-4" id="text-7-1-1">
 <div class="org-src-container">
 <pre class="src src-js">provider <span style="color: #98be65;">"aws"</span> {
@@ -499,8 +500,8 @@ provider <span style="color: #98be65;">"aws"</span> {
 </div>
 </div>
 </div>
-<div id="outline-container-org5d58949" class="outline-3">
-<h3 id="org5d58949"><span class="section-number-3">7.2</span> Create variables&#xa0;&#xa0;&#xa0;<span class="tag"><span class="variables">variables</span></span></h3>
+<div id="outline-container-org3853691" class="outline-3">
+<h3 id="org3853691"><span class="section-number-3">7.2</span> Create variables&#xa0;&#xa0;&#xa0;<span class="tag"><span class="variables">variables</span></span></h3>
 <div class="outline-text-3" id="text-7-2">
 <ul class="org-ul">
 <li>Input variables serve as parameters for a Terraform module, allowing aspects of the module to be customized without altering the module&rsquo;s own source code, and allowing modules to be shared between different configurations.
@@ -509,8 +510,8 @@ provider <span style="color: #98be65;">"aws"</span> {
 </ul></li>
 </ul>
 </div>
-<div id="outline-container-org169567c" class="outline-4">
-<h4 id="org169567c"><span class="section-number-4">7.2.1</span> <a href="./variables.tf">./variables.tf</a></h4>
+<div id="outline-container-orgfd42637" class="outline-4">
+<h4 id="orgfd42637"><span class="section-number-4">7.2.1</span> <a href="./variables.tf">./variables.tf</a></h4>
 <div class="outline-text-4" id="text-7-2-1">
 <ul class="org-ul">
 <li>profile and default user</li>
@@ -558,12 +559,12 @@ variable <span style="color: #98be65;">"instance-type"</span> {
 </div>
 </div>
 </div>
-<div id="outline-container-orga60b5f1" class="outline-3">
-<h3 id="orga60b5f1"><span class="section-number-3">7.3</span> Create a network&#xa0;&#xa0;&#xa0;<span class="tag"><span class="network">network</span></span></h3>
+<div id="outline-container-org0034cf1" class="outline-3">
+<h3 id="org0034cf1"><span class="section-number-3">7.3</span> Create a network&#xa0;&#xa0;&#xa0;<span class="tag"><span class="network">network</span></span></h3>
 <div class="outline-text-3" id="text-7-3">
 </div>
-<div id="outline-container-org83e2d73" class="outline-4">
-<h4 id="org83e2d73"><span class="section-number-4">7.3.1</span> Create VPCs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="vpc">vpc</span></span></h4>
+<div id="outline-container-orgcfd4103" class="outline-4">
+<h4 id="orgcfd4103"><span class="section-number-4">7.3.1</span> Create VPCs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="vpc">vpc</span></span></h4>
 <div class="outline-text-4" id="text-7-3-1">
 <ul class="org-ul">
 <li>A virtual network dedicated to your AWS account.
@@ -573,7 +574,7 @@ variable <span style="color: #98be65;">"instance-type"</span> {
 </ul>
 </div>
 <ol class="org-ol">
-<li><a id="org6e149b5"></a><a href="./network.tf">./network.tf</a><br />
+<li><a id="org5d00580"></a><a href="./network.tf">./network.tf</a><br />
 <div class="outline-text-5" id="text-7-3-1-1">
 <ul class="org-ul">
 <li>VPCs
@@ -593,7 +594,7 @@ variable <span style="color: #98be65;">"instance-type"</span> {
 <li>tag as <code>worker-vpc-jenkins</code></li>
 </ul></li>
 </ul></li>
-<li>Variables come from: <a href="#org5d58949">Create variables</a></li>
+<li>Variables come from: <a href="#org3853691">Create variables</a></li>
 </ul>
 <div class="org-src-container">
 <pre class="src src-js">#Create VPC <span style="color: #51afef;">in</span> us-east-<span style="color: #da8548; font-weight: bold;">1</span>
@@ -622,8 +623,8 @@ resource <span style="color: #98be65;">"aws_vpc"</span> <span style="color: #98b
 </li>
 </ol>
 </div>
-<div id="outline-container-org68b975a" class="outline-4">
-<h4 id="org68b975a"><span class="section-number-4">7.3.2</span> Create IGWs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="igw">igw</span></span></h4>
+<div id="outline-container-org603b3ae" class="outline-4">
+<h4 id="org603b3ae"><span class="section-number-4">7.3.2</span> Create IGWs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="igw">igw</span></span></h4>
 <div class="outline-text-4" id="text-7-3-2">
 <ul class="org-ul">
 <li>An internet gateway is a horizontally scaled, redundant, and highly available VPC component that allows communication between your VPC and the internet.
@@ -633,7 +634,7 @@ resource <span style="color: #98be65;">"aws_vpc"</span> <span style="color: #98b
 </ul>
 </div>
 <ol class="org-ol">
-<li><a id="orgf2115c5"></a><a href="./network.tf">./network.tf</a><br />
+<li><a id="org3e76518"></a><a href="./network.tf">./network.tf</a><br />
 <div class="outline-text-5" id="text-7-3-2-1">
 <ul class="org-ul">
 <li>create an internet gateway in each VPC, which reside in different availability zones (us-east-1 and us-west-2)</li>
@@ -655,8 +656,8 @@ resource <span style="color: #98be65;">"aws_internet_gateway"</span> <span style
 </li>
 </ol>
 </div>
-<div id="outline-container-orgc74a2be" class="outline-4">
-<h4 id="orgc74a2be"><span class="section-number-4">7.3.3</span> Provide Data&#xa0;&#xa0;&#xa0;<span class="tag"><span class="data">data</span></span></h4>
+<div id="outline-container-orgc4a9ae5" class="outline-4">
+<h4 id="orgc4a9ae5"><span class="section-number-4">7.3.3</span> Provide Data&#xa0;&#xa0;&#xa0;<span class="tag"><span class="data">data</span></span></h4>
 <div class="outline-text-4" id="text-7-3-3">
 <ul class="org-ul">
 <li>Data sources allow Terraform use information defined outside of Terraform, defined by another separate Terraform configuration, or modified by functions.
@@ -666,7 +667,7 @@ resource <span style="color: #98be65;">"aws_internet_gateway"</span> <span style
 </ul>
 </div>
 <ol class="org-ol">
-<li><a id="orgbae069a"></a><a href="./network.tf">./network.tf</a><br />
+<li><a id="org5b223e6"></a><a href="./network.tf">./network.tf</a><br />
 <div class="outline-text-5" id="text-7-3-3-1">
 <ul class="org-ul">
 <li>get <code>aws_availability_zones</code> that are in <code>state: available</code></li>
@@ -683,8 +684,8 @@ data <span style="color: #98be65;">"aws_availability_zones"</span> <span style="
 </li>
 </ol>
 </div>
-<div id="outline-container-org64c8b74" class="outline-4">
-<h4 id="org64c8b74"><span class="section-number-4">7.3.4</span> Create Subnets in our VPCs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="subnet">subnet</span></span></h4>
+<div id="outline-container-orgd5cf8ca" class="outline-4">
+<h4 id="orgd5cf8ca"><span class="section-number-4">7.3.4</span> Create Subnets in our VPCs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="subnet">subnet</span></span></h4>
 <div class="outline-text-4" id="text-7-3-4">
 <ul class="org-ul">
 <li>When you create a VPC, you must specify a range of IPv4 addresses for the VPC in the form of a Classless Inter-Domain Routing (CIDR) block; for example, 10.0.0.0/16. This is the primary CIDR block for your VPC. For more information about CIDR notation, see RFC 4632.
@@ -694,15 +695,15 @@ data <span style="color: #98be65;">"aws_availability_zones"</span> <span style="
 </ul>
 </div>
 <ol class="org-ol">
-<li><a id="org0e7edd2"></a><a href="./network.tf">./network.tf</a><br />
+<li><a id="org8371e9e"></a><a href="./network.tf">./network.tf</a><br />
 <div class="outline-text-5" id="text-7-3-4-1">
 <ul class="org-ul">
-<li>two subnets in the master VPC defined in <a href="#org83e2d73">Create VPCs</a>.
+<li>two subnets in the master VPC defined in <a href="#orgcfd4103">Create VPCs</a>.
 <ul class="org-ul">
 <li><code>10.0.1.0/24</code></li>
 <li><code>10.0.2.0/24</code></li>
 </ul></li>
-<li>one subnet in the worker VPC defined in  <a href="#org83e2d73">Create VPCs</a>.
+<li>one subnet in the worker VPC defined in  <a href="#orgcfd4103">Create VPCs</a>.
 <ul class="org-ul">
 <li><code>192.168.1.0/24</code></li>
 </ul></li>
@@ -734,8 +735,8 @@ data <span style="color: #98be65;">"aws_availability_zones"</span> <span style="
 </li>
 </ol>
 </div>
-<div id="outline-container-orgc453594" class="outline-4">
-<h4 id="orgc453594"><span class="section-number-4">7.3.5</span> Create Peering between VPCs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="peering">peering</span></span></h4>
+<div id="outline-container-orgc1082eb" class="outline-4">
+<h4 id="orgc1082eb"><span class="section-number-4">7.3.5</span> Create Peering between VPCs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="peering">peering</span></span></h4>
 <div class="outline-text-4" id="text-7-3-5">
 <ul class="org-ul">
 <li>A VPC peering connection is a networking connection between two VPCs that enables you to route traffic between them using private IPv4 addresses or IPv6 addresses.
@@ -745,7 +746,7 @@ data <span style="color: #98be65;">"aws_availability_zones"</span> <span style="
 </ul>
 </div>
 <ol class="org-ol">
-<li><a id="org87e609c"></a><a href="./network.tf">./network.tf</a><br />
+<li><a id="org095d375"></a><a href="./network.tf">./network.tf</a><br />
 <div class="outline-text-5" id="text-7-3-5-1">
 <ul class="org-ul">
 <li>Create a peering connection request from the master VPC.</li>
@@ -772,8 +773,8 @@ resource <span style="color: #98be65;">"aws_vpc_peering_connection_accepter"</sp
 </li>
 </ol>
 </div>
-<div id="outline-container-org8ab5b2d" class="outline-4">
-<h4 id="org8ab5b2d"><span class="section-number-4">7.3.6</span> Create Routing in and between VPCs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="route">route</span>&#xa0;<span class="vpc">vpc</span></span></h4>
+<div id="outline-container-org9160310" class="outline-4">
+<h4 id="org9160310"><span class="section-number-4">7.3.6</span> Create Routing in and between VPCs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="route">route</span>&#xa0;<span class="vpc">vpc</span></span></h4>
 <div class="outline-text-4" id="text-7-3-6">
 <ul class="org-ul">
 <li>A route table contains a set of rules, called routes, that are used to determine where network traffic from your subnet or gateway is directed.
@@ -783,19 +784,19 @@ resource <span style="color: #98be65;">"aws_vpc_peering_connection_accepter"</sp
 </ul>
 </div>
 <ol class="org-ol">
-<li><a id="org3422666"></a><a href="./network.tf">./network.tf</a><br />
+<li><a id="org4707626"></a><a href="./network.tf">./network.tf</a><br />
 <div class="outline-text-5" id="text-7-3-6-1">
 <ul class="org-ul">
 <li>create a routing table for the master VPC
 <ul class="org-ul">
 <li>to internet via <code>aws_internet_gateway.igw.id</code></li>
-<li>to the worker VPC Peering Connection created in:  <a href="#orgc453594">Create Peering between VPCs</a></li>
+<li>to the worker VPC Peering Connection created in:  <a href="#orgc1082eb">Create Peering between VPCs</a></li>
 </ul></li>
 <li>replace default route of the master VPC with the routing table created above</li>
 <li>create routing table for worker VPC
 <ul class="org-ul">
 <li>to internet via <code>aws_internet_gateway.igw.id</code></li>
-<li>to the master VPC Peering Connection created in:  <a href="#orgc453594">Create Peering between VPCs</a></li>
+<li>to the master VPC Peering Connection created in:  <a href="#orgc1082eb">Create Peering between VPCs</a></li>
 </ul></li>
 <li>replace default route of the worker VPC with the routing table created above</li>
 </ul>
@@ -856,8 +857,8 @@ resource <span style="color: #98be65;">"aws_main_route_table_association"</span>
 </li>
 </ol>
 </div>
-<div id="outline-container-org5a24848" class="outline-4">
-<h4 id="org5a24848"><span class="section-number-4">7.3.7</span> Create Security Groups&#xa0;&#xa0;&#xa0;<span class="tag"><span class="security_groups">security_groups</span></span></h4>
+<div id="outline-container-orgb9dec9a" class="outline-4">
+<h4 id="orgb9dec9a"><span class="section-number-4">7.3.7</span> Create Security Groups&#xa0;&#xa0;&#xa0;<span class="tag"><span class="security_groups">security_groups</span></span></h4>
 <div class="outline-text-4" id="text-7-3-7">
 <ul class="org-ul">
 <li>A security group acts as a virtual firewall for your instance to control inbound and outbound traffic.
@@ -867,7 +868,7 @@ resource <span style="color: #98be65;">"aws_main_route_table_association"</span>
 </ul>
 </div>
 <ol class="org-ol">
-<li><a id="org02b3a6a"></a><a href="./security_groups.tf">./security_groups.tf</a><br />
+<li><a id="orge1d7f58"></a><a href="./security_groups.tf">./security_groups.tf</a><br />
 <div class="outline-text-5" id="text-7-3-7-1">
 <ul class="org-ul">
 <li>create a SG for the: TODO Application Load Balancer TODO
@@ -880,14 +881,14 @@ resource <span style="color: #98be65;">"aws_main_route_table_association"</span>
 <li>allow in from 80/443 web ports.</li>
 <li>allow out anywhere for ephemeral ports.</li>
 <li>allow ssh from port 22 from our home IP</li>
-<li>allow in from us-west-2 (worker) subnet created in  <a href="#org64c8b74">Create Subnets in our VPCs</a></li>
+<li>allow in from us-west-2 (worker) subnet created in  <a href="#orgd5cf8ca">Create Subnets in our VPCs</a></li>
 </ul></li>
 <li>create a security group for Jenkins in VPC worker
 <ul class="org-ul">
 <li>allow in from 80/443 web ports.</li>
 <li>allow out anywhere for ephemeral ports.</li>
 <li>allow ssh from port 22 from our home IP</li>
-<li>allow in from us-east-1 (master) subnet created in  <a href="#org64c8b74">Create Subnets in our VPCs</a></li>
+<li>allow in from us-east-1 (master) subnet created in  <a href="#orgd5cf8ca">Create Subnets in our VPCs</a></li>
 </ul></li>
 </ul>
 <div class="org-src-container">
@@ -987,12 +988,12 @@ resource <span style="color: #98be65;">"aws_security_group"</span> <span style="
 </ol>
 </div>
 </div>
-<div id="outline-container-org6198007" class="outline-3">
-<h3 id="org6198007"><span class="section-number-3">7.4</span> Create Instances</h3>
+<div id="outline-container-org0c0ce19" class="outline-3">
+<h3 id="org0c0ce19"><span class="section-number-3">7.4</span> Create Instances</h3>
 <div class="outline-text-3" id="text-7-4">
 </div>
-<div id="outline-container-orgac6a782" class="outline-4">
-<h4 id="orgac6a782"><span class="section-number-4">7.4.1</span> Get AMIs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="ami">ami</span>&#xa0;<span class="vm">vm</span></span></h4>
+<div id="outline-container-org6f182f8" class="outline-4">
+<h4 id="org6f182f8"><span class="section-number-4">7.4.1</span> Get AMIs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="ami">ami</span>&#xa0;<span class="vm">vm</span></span></h4>
 <div class="outline-text-4" id="text-7-4-1">
 <ul class="org-ul">
 <li>An Amazon Machine Image (AMI) provides the information required to launch an instance.
@@ -1002,7 +1003,7 @@ resource <span style="color: #98be65;">"aws_security_group"</span> <span style="
 </ul>
 </div>
 <ol class="org-ol">
-<li><a id="org6494b9d"></a><a href="./instances.tf">./instances.tf</a><br />
+<li><a id="orgdf26706"></a><a href="./instances.tf">./instances.tf</a><br />
 <div class="outline-text-5" id="text-7-4-1-1">
 <ul class="org-ul">
 <li>data
@@ -1029,12 +1030,12 @@ data <span style="color: #98be65;">"aws_ssm_parameter"</span> <span style="color
 </li>
 </ol>
 </div>
-<div id="outline-container-org32184fd" class="outline-4">
-<h4 id="org32184fd"><span class="section-number-4">7.4.2</span> Set cloud-init Scripts</h4>
+<div id="outline-container-org5ebb1e4" class="outline-4">
+<h4 id="org5ebb1e4"><span class="section-number-4">7.4.2</span> Set cloud-init Scripts</h4>
 <div class="outline-text-4" id="text-7-4-2">
 </div>
 <ol class="org-ol">
-<li><a id="orgd281427"></a><a href="./instances.tf">./instances.tf</a><br />
+<li><a id="orgc7b1fd2"></a><a href="./instances.tf">./instances.tf</a><br />
 <div class="outline-text-5" id="text-7-4-2-1">
 <ul class="org-ul">
 <li>data
@@ -1052,8 +1053,8 @@ data <span style="color: #98be65;">"aws_ssm_parameter"</span> <span style="color
 </li>
 </ol>
 </div>
-<div id="outline-container-orgc697e1d" class="outline-4">
-<h4 id="orgc697e1d"><span class="section-number-4">7.4.3</span> Configure SSH keypairs for AMI VMs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="keypair">keypair</span></span></h4>
+<div id="outline-container-org8a25a47" class="outline-4">
+<h4 id="org8a25a47"><span class="section-number-4">7.4.3</span> Configure SSH keypairs for AMI VMs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="keypair">keypair</span></span></h4>
 <div class="outline-text-4" id="text-7-4-3">
 <ul class="org-ul">
 <li>A key pair, consisting of a public key and a private key, is a set of security credentials that you use to prove your identity when connecting to an Amazon EC2 instance. Amazon EC2 stores the public key on your instance, and you store the private key. For Linux instances, the private key allows you to securely SSH into your instance. Anyone who possesses your private key can connect to your instances, so it&rsquo;s important that you store your private key in a secure place.
@@ -1063,7 +1064,7 @@ data <span style="color: #98be65;">"aws_ssm_parameter"</span> <span style="color
 </ul>
 </div>
 <ol class="org-ol">
-<li><a id="orgee13671"></a><a href="./instances.tf">./instances.tf</a><br />
+<li><a id="org542521d"></a><a href="./instances.tf">./instances.tf</a><br />
 <div class="outline-text-5" id="text-7-4-3-1">
 <ul class="org-ul">
 <li>assign keypairs for each region from <a href="./ssh/id_rsa.pub">./ssh/id_rsa.pub</a></li>
@@ -1087,8 +1088,8 @@ resource <span style="color: #98be65;">"aws_key_pair"</span> <span style="color:
 </li>
 </ol>
 </div>
-<div id="outline-container-org1c8d942" class="outline-4">
-<h4 id="org1c8d942"><span class="section-number-4">7.4.4</span> Create EC2 Instances&#xa0;&#xa0;&#xa0;<span class="tag"><span class="ec2">ec2</span></span></h4>
+<div id="outline-container-org8533b76" class="outline-4">
+<h4 id="org8533b76"><span class="section-number-4">7.4.4</span> Create EC2 Instances&#xa0;&#xa0;&#xa0;<span class="tag"><span class="ec2">ec2</span></span></h4>
 <div class="outline-text-4" id="text-7-4-4">
 <ul class="org-ul">
 <li>Amazon Elastic Compute Cloud (Amazon EC2) is a web service that provides secure, resizable compute capacity in the cloud. It is designed to make web-scale cloud computing easier for developers.
@@ -1098,7 +1099,7 @@ resource <span style="color: #98be65;">"aws_key_pair"</span> <span style="color:
 </ul>
 </div>
 <ol class="org-ol">
-<li><a id="org4fce974"></a><a href="./instances.tf">./instances.tf</a><br />
+<li><a id="orgffe5256"></a><a href="./instances.tf">./instances.tf</a><br />
 <div class="outline-text-5" id="text-7-4-4-1">
 <div class="org-src-container">
 <pre class="src src-js">#Create and bootstrap EC2 <span style="color: #51afef;">in</span> us-east-<span style="color: #da8548; font-weight: bold;">1</span>
@@ -1139,16 +1140,16 @@ resource <span style="color: #98be65;">"aws_instance"</span> <span style="color:
 </div>
 </div>
 </div>
-<div id="outline-container-orgeead65c" class="outline-2">
-<h2 id="orgeead65c"><span class="section-number-2">8</span> Bootstrap EC2 with cloud-init&#xa0;&#xa0;&#xa0;<span class="tag"><span class="cloudinit">cloudinit</span></span></h2>
+<div id="outline-container-orga9ca361" class="outline-2">
+<h2 id="orga9ca361"><span class="section-number-2">8</span> Bootstrap EC2 with cloud-init&#xa0;&#xa0;&#xa0;<span class="tag"><span class="cloudinit">cloudinit</span></span></h2>
 <div class="outline-text-2" id="text-8">
 <ul class="org-ul">
 <li><a href="https://cloudinit.readthedocs.io/en/latest/">https://cloudinit.readthedocs.io/en/latest/</a></li>
 <li><a href="https://cloudinit.readthedocs.io/en/latest/topics/examples.html">https://cloudinit.readthedocs.io/en/latest/topics/examples.html</a></li>
 </ul>
 </div>
-<div id="outline-container-org499ad85" class="outline-3">
-<h3 id="org499ad85"><span class="section-number-3">8.1</span> <a href="./scripts/cloud-init.yaml">./scripts/cloud-init.yaml</a></h3>
+<div id="outline-container-org5ff9b0a" class="outline-3">
+<h3 id="org5ff9b0a"><span class="section-number-3">8.1</span> <a href="./scripts/cloud-init.yaml">./scripts/cloud-init.yaml</a></h3>
 <div class="outline-text-3" id="text-8-1">
 <ul class="org-ul">
 <li>install software</li>
@@ -1172,10 +1173,19 @@ runcmd:
 </div>
 </div>
 </div>
+<div id="outline-container-orgfa82e7e" class="outline-2">
+<h2 id="orgfa82e7e"><span class="section-number-2">9</span> Verify your instance up to this point:</h2>
+<div class="outline-text-2" id="text-9">
+<div class="org-src-container">
+<pre class="src src-sh">ssh ec2-user@$<span style="color: #51afef;">(</span><span style="color: #51afef; font-weight: bold;">terraform</span> output -json | jq  -r <span style="color: #98be65;">'."Jenkins-Main-Node-Public-IP"."value"'</span><span style="color: #51afef;">)</span> <span style="color: #98be65;">"</span><span style="color: #98be65;">grep</span><span style="color: #98be65;"> "</span>testing <span style="color: #da8548; font-weight: bold;">1</span><span style="color: #98be65;">" /var/log/cloud-init-output.log"</span>
+</pre>
+</div>
+</div>
+</div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: edward</p>
-<p class="date">Created: 2021-08-24 Tue 20:36</p>
+<p class="date">Created: 2021-08-24 Tue 20:41</p>
 </div>
 </body>
 </html>
