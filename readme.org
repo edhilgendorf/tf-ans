@@ -18,6 +18,10 @@ Documentation and code are built into this same [[https://orgmode.org/][orgmode]
 4. /optional/ Apply any necessary formatting, ex: ~terraform fmt~
 5. Check in and push changes. This document and corresponding repositories *should* be VCS driven, with changes applied after successful Git commit/push.
 The purpose of this is to build a cloud based project using IaC that explains *why* each step is done, as well as *how*, all in one place. See this document in plain text, here: [[https://raw.githubusercontent.com/edhilgendorf/tf-ans/main/readme.org][readme.org]]
+** Links
+- [[https://github.com/edhilgendorf/tf-ans][Project GitHub]]
+- [[https://edhilgendorf.github.io/tf-ans/][Read the docs]]
+- [[https://hilgendorf.me][hilgendorf.me]]
 * Conventions
 ** syntax
 | type         | example      |
