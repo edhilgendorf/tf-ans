@@ -6,4 +6,4 @@ packages:
   - tmux
 runcmd:
   - aws --version
-  - echo "testing 1 two three"
+  - echo "cathead-biscuit"

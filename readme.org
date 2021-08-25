@@ -595,9 +595,9 @@ packages:
   - tmux
 runcmd:
   - aws --version
-  - echo "testing 1 two three"
+  - echo "cathead-biscuit"
 #+end_src
 * Verify project up to this point
 #+begin_src sh
-ssh -o StrictHostKeyChecking=no ec2-user@$(terraform output -json | jq  -r '."Jenkins-Main-Node-Public-IP"."value"') "sudo grep 'testing 1' /var/log/cloud-init-output.log"
+ssh -o StrictHostKeyChecking=no ec2-user@$(terraform output -json | jq  -r '."Jenkins-Main-Node-Public-IP"."value"') "sudo grep 'cathead' /var/log/cloud-init-output.log"
 #+end_src
