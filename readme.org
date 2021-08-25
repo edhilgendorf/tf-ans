@@ -67,28 +67,49 @@ sudo apt-get update && sudo apt-get install packer
 [[./policies/base.json]]
 * Configure Terraform Cloud
 - Regsiter account: https://app.terraform.io/signup/account?utm_source=terraform_io&utm_content=terraform_cloud_top_nav
-** Setup Terraform Cloud State
 - Create an organization
 - Create a Workspace from VCS Repository, ex: https://github.com
 - Create a token and save in ~~/.terraform.d/credentials.tfrc.json~
   - https://app.terraform.io/app/settings/tokens
-- Create Terraform Backend config locally:
-  #+begin_src json
-  terraform {
-    backend "remote" {
-      organization = "<your_org>"
-      workspaces {
-        name ="<your_workspace>"
-      }
-    }
-  }
-  #+end_src
 - Add access keys to Terraform Cloud
- - https://app.terraform.io/app/<organization>/workspaces/<workspace>/variables
+  - https://app.terraform.io/app/<organization>/workspaces/<workspace>/variables
 - Initialize your environment ~terraform init~
 - Configure Terraform Cloud to plan and apply upon check-in
   + https://app.terraform.io/app/<your_org>/workspaces/<your_workspace>/settings/general
+- setup a backend remote pointing to your org/workspace
+** [[./backend.tf]]
+:PROPERTIES:
+:header-args: :tangle backend.tf
+:END:
+#+begin_src json
+terraform {
+  backend "remote" {
+    organization = "hilgendorfdotme"
+    workspaces {
+      name = "tf-ans"
+    }
+  }
+}
+#+end_src
 * Create Infrastructure with Terraform :terraform:iac:
+** Configure Providers
+*** [[./providers.tf]]
+:PROPERTIES:
+:header-args: :tangle providers.tf
+:END:
+#+begin_src js
+provider "aws" {
+  #profile = var.profile
+  region = var.region-master
+  alias  = "region-master"
+}
+
+provider "aws" {
+  #profile = var.profile
+  region = var.region-worker
+  alias  = "region-worker"
+}
+#+end_src
 ** Create variables :variables:
 - Input variables serve as parameters for a Terraform module, allowing aspects of the module to be customized without altering the module's own source code, and allowing modules to be shared between different configurations.
   + https://www.terraform.io/docs/language/values/variables.html
@@ -448,22 +469,122 @@ resource "aws_security_group" "jenkins-sg-oregon" {
 }
 #+end_src
 ** Create Instances
-*** Configure AMIs :ami:vm:
+*** Get AMIs :ami:vm:
 - An Amazon Machine Image (AMI) provides the information required to launch an instance.
   + https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html
-- [[./instances.tf]]
-  + data
-    - get the AMI names for the latest Amazon Linux AMI
+**** [[./instances.tf]]
+:PROPERTIES:
+:header-args: :tangle instances.tf
+:END:
++ data
+  - get the AMI names for the latest Amazon Linux AMI
+  - store this as linuxAmi and linuxAmiOregon
+  - can later be accessed with: ~data.aws_ssm_parameter.linuxAmi.value~
+#+begin_src js
+#Get Linux AMI ID using SSM Parameter endpoint in us-east-1
+data "aws_ssm_parameter" "linuxAmi" {
+  provider = aws.region-master
+  name     = "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
+}
+#Get Linux AMI ID using SSM Parameter endpoint in us-west-2
+data "aws_ssm_parameter" "linuxAmiOregon" {
+  provider = aws.region-worker
+  name     = "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
+}
+#+end_src
+*** Set cloud-init Scripts
+**** [[./instances.tf]]
+:PROPERTIES:
+:header-args: :tangle instances.tf
+:END:
++ data
+  - store cloud-init as data to pass to EC2 for boostrapping
+#+begin_src js
+data "template_file" "user_data" {
+  template = file("./scripts/cloud-init.yaml")
+}
+#+end_src
 *** Configure SSH keypairs for AMI VMs :keypair:
 - A key pair, consisting of a public key and a private key, is a set of security credentials that you use to prove your identity when connecting to an Amazon EC2 instance. Amazon EC2 stores the public key on your instance, and you store the private key. For Linux instances, the private key allows you to securely SSH into your instance. Anyone who possesses your private key can connect to your instances, so it's important that you store your private key in a secure place.
   + https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html
-- [[./instances.tf]]
-  + create keypairs for each region
-*** Bootstrap EC2 Instances with cloud-init :ansible:ec2:
-- https://cloudinit.readthedocs.io/en/latest/topics/examples.html
+**** [[./instances.tf]]
+:PROPERTIES:
+:header-args: :tangle instances.tf
+:END:
++ assign keypairs for each region from [[./ssh/id_rsa.pub]]
+#+begin_src js
+#Create key-pair for logging into EC2 in us-east-1
+resource "aws_key_pair" "master-key" {
+  provider = aws.region-master
+  key_name = "jenkins"
+  public_key = file("ssh/id_rsa.pub")
+}
+#Create key-pair for logging into EC2 in us-west-2
+resource "aws_key_pair" "worker-key" {
+  provider = aws.region-worker
+  key_name = "jenkins"
+  public_key = file("ssh/id_rsa.pub")
+}
+#+end_src
+*** Create EC2 Instances :ec2:
+- Amazon Elastic Compute Cloud (Amazon EC2) is a web service that provides secure, resizable compute capacity in the cloud. It is designed to make web-scale cloud computing easier for developers.
+  + https://aws.amazon.com/ec2/?ec2-whats-new.sort-by=item.additionalFields.postDateTime&ec2-whats-new.sort-order=desc
+**** [[./instances.tf]]
+:PROPERTIES:
+:header-args: :tangle instances.tf
+:END:
+#+begin_src js
+#Create and bootstrap EC2 in us-east-1
+resource "aws_instance" "jenkins-master" {
+  provider                    = aws.region-master
+  ami                         = data.aws_ssm_parameter.linuxAmi.value
+  instance_type               = var.instance-type
+  key_name                    = aws_key_pair.master-key.key_name
+  associate_public_ip_address = true
+  vpc_security_group_ids      = [aws_security_group.jenkins-sg.id]
+  subnet_id                   = aws_subnet.subnet_1.id
+  user_data                   = data.template_file.user_data.rendered
+  tags = {
+    Name = "jenkins_master_tf"
+  }
+  depends_on = [aws_main_route_table_association.set-master-default-rt-assoc]
+}
+#Create EC2 in us-west-2
+resource "aws_instance" "jenkins-worker-oregon" {
+  provider                    = aws.region-worker
+  count                       = var.workers-count
+  ami                         = data.aws_ssm_parameter.linuxAmiOregon.value
+  instance_type               = var.instance-type
+  key_name                    = aws_key_pair.worker-key.key_name
+  associate_public_ip_address = true
+  vpc_security_group_ids      = [aws_security_group.jenkins-sg-oregon.id]
+  subnet_id                   = aws_subnet.subnet_1_oregon.id
+  tags = {
+    Name = join("_", ["jenkins_worker_tf", count.index + 1])
+  }
+  depends_on = [aws_main_route_table_association.set-worker-default-rt-assoc, aws_instance.jenkins-master]
+}
+#+end_src
 * Bootstrap EC2 with cloud-init :cloudinit:
 - https://cloudinit.readthedocs.io/en/latest/
-- [[./cloud-init.yaml]]
-  + install software
-  + create users
-  + jenkins-master will also be ansible master
+- https://cloudinit.readthedocs.io/en/latest/topics/examples.html
+** [[./scripts/cloud-init.yaml]]
+:PROPERTIES:
+:header-args: :tangle scripts/cloud-init.yaml
+:END:
++ install software
++ create users
++ jenkins-master will also be ansible master
+#+begin_src yaml
+#cloud-config
+package_update: true
+package_upgrade: true
+packages:
+  - awscli
+  - tmux
+
+runcmd:
+  - aws --version
+  - echo "testing 1 two three"
+
+#+end_src
