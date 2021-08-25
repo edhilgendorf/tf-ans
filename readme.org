@@ -30,9 +30,9 @@ The purpose of this is to build a cloud based project using IaC that explains *w
 ** Code Example
 - Each block will be named as above
 - Following will be bullet points with an explanation and /hopefully/ a link to the corresponding resource
-*** [[./example_code.py]] <-- the file that will be "tangled", see [[*This Document][This Document]]
+*** [[./terraform/example_code.py]] <-- the file that will be "tangled", see [[*This Document][This Document]]
 :PROPERTIES:
-:header-args: :tangle example_code.py
+:header-args: :tangle terraform/example_code.py
 :END:
 - This prints "hello world" to the user on execution
   #+begin_src python
@@ -69,7 +69,7 @@ sudo apt-get update && sudo apt-get install packer
 - Add root user as default, or create IAM admin:
   https://console.aws.amazon.com/iam/home?region=us-east-1#/security_credentials$access_key
 *** attach a base policy :policy:
-[[./policies/base.json]]
+[[./terraform/policies/base.json]]
 * Configure Terraform Cloud
 - Regsiter account: https://app.terraform.io/signup/account?utm_source=terraform_io&utm_content=terraform_cloud_top_nav
 - Create an organization
@@ -82,9 +82,9 @@ sudo apt-get update && sudo apt-get install packer
 - Configure Terraform Cloud to plan and apply upon check-in
   + https://app.terraform.io/app/<your_org>/workspaces/<your_workspace>/settings/general
 - setup a backend remote pointing to your org/workspace
-** [[./backend.tf]]
+** [[./terraform/backend.tf]]
 :PROPERTIES:
-:header-args: :tangle backend.tf
+:header-args: :tangle terraform/backend.tf
 :END:
 #+begin_src json
 terraform {
@@ -98,9 +98,9 @@ terraform {
 #+end_src
 * Create Infrastructure with Terraform :terraform:iac:
 ** Configure Providers
-*** [[./providers.tf]]
+*** [[./terraform/providers.tf]]
 :PROPERTIES:
-:header-args: :tangle providers.tf
+:header-args: :tangle terraform/providers.tf
 :END:
 #+begin_src js
 provider "aws" {
@@ -118,9 +118,9 @@ provider "aws" {
 ** Create variables :variables:
 - Input variables serve as parameters for a Terraform module, allowing aspects of the module to be customized without altering the module's own source code, and allowing modules to be shared between different configurations.
   + https://www.terraform.io/docs/language/values/variables.html
-*** [[./variables.tf]]
+*** [[./terraform/variables.tf]]
 :PROPERTIES:
-:header-args: :tangle variables.tf
+:header-args: :tangle terraform/variables.tf
 :END:
 - profile and default user
 - two regions
@@ -164,9 +164,9 @@ variable "instance-type" {
 *** Create VPCs :vpc:
 - A virtual network dedicated to your AWS account.
   + https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html
-**** [[./network.tf]]
+**** [[./terraform/network.tf]]
 :PROPERTIES:
-:header-args: :tangle network.tf
+:header-args: :tangle terraform/network.tf
 :END:
 + VPCs
   - *vpc_master*
@@ -205,9 +205,9 @@ resource "aws_vpc" "vpc_master_oregon" {
 *** Create IGWs :igw:
 - An internet gateway is a horizontally scaled, redundant, and highly available VPC component that allows communication between your VPC and the internet.
   + https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
-**** [[./network.tf]]
+**** [[./terraform/network.tf]]
 :PROPERTIES:
-:header-args: :tangle network.tf
+:header-args: :tangle terraform/network.tf
 :END:
 + create an internet gateway in each VPC, which reside in different availability zones (us-east-1 and us-west-2)
 #+begin_src js
@@ -225,9 +225,9 @@ resource "aws_internet_gateway" "igw-oregon" {
 *** Provide Data :data:
 - Data sources allow Terraform use information defined outside of Terraform, defined by another separate Terraform configuration, or modified by functions.
   + https://www.terraform.io/docs/language/data-sources/index.html
-**** [[./network.tf]]
+**** [[./terraform/network.tf]]
   :PROPERTIES:
-  :header-args: :tangle network.tf
+  :header-args: :tangle terraform/network.tf
   :END:
   + get ~aws_availability_zones~ that are in ~state: available~
   #+begin_src js
@@ -240,9 +240,9 @@ data "aws_availability_zones" "azs" {
 *** Create Subnets in our VPCs :subnet:
 - When you create a VPC, you must specify a range of IPv4 addresses for the VPC in the form of a Classless Inter-Domain Routing (CIDR) block; for example, 10.0.0.0/16. This is the primary CIDR block for your VPC. For more information about CIDR notation, see RFC 4632.
   + https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Subnets.html
-**** [[./network.tf]]
+**** [[./terraform/network.tf]]
 :PROPERTIES:
-  :header-args: :tangle network.tf
+  :header-args: :tangle terraform/network.tf
   :END:
 + two subnets in the master VPC defined in [[*Create VPCs][Create VPCs]].
   - ~10.0.1.0/24~
@@ -274,9 +274,9 @@ data "aws_availability_zones" "azs" {
 *** Create Peering between VPCs :peering:
 - A VPC peering connection is a networking connection between two VPCs that enables you to route traffic between them using private IPv4 addresses or IPv6 addresses.
   + https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html
-**** [[./network.tf]]
+**** [[./terraform/network.tf]]
 :PROPERTIES:
-  :header-args: :tangle network.tf
+  :header-args: :tangle terraform/network.tf
   :END:
 + Create a peering connection request from the master VPC.
 + Create a peering connection acceptor from the worker VPC.
@@ -299,9 +299,9 @@ resource "aws_vpc_peering_connection_accepter" "accept_peering" {
 *** Create Routing in and between VPCs :route:vpc:
 - A route table contains a set of rules, called routes, that are used to determine where network traffic from your subnet or gateway is directed.
   + https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html
-**** [[./network.tf]]
+**** [[./terraform/network.tf]]
 :PROPERTIES:
-  :header-args: :tangle network.tf
+  :header-args: :tangle terraform/network.tf
   :END:
 + create a routing table for the master VPC
   - to internet via ~aws_internet_gateway.igw.id~
@@ -366,9 +366,9 @@ resource "aws_main_route_table_association" "set-worker-default-rt-assoc" {
 *** Create Security Groups :security_groups:
 - A security group acts as a virtual firewall for your instance to control inbound and outbound traffic.
   + https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html
-**** [[./security_groups.tf]]
+**** [[./terraform/security_groups.tf]]
 :PROPERTIES:
-:header-args: :tangle security_groups.tf
+:header-args: :tangle terraform/security_groups.tf
 :END:
 + create a SG for the: TODO Application Load Balancer TODO
   - allow in from 80/443 web ports.
@@ -478,9 +478,9 @@ resource "aws_security_group" "jenkins-sg-oregon" {
 *** Get AMIs :ami:vm:
 - An Amazon Machine Image (AMI) provides the information required to launch an instance.
   + https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html
-**** [[./instances.tf]]
+**** [[./terraform/instances.tf]]
 :PROPERTIES:
-:header-args: :tangle instances.tf
+:header-args: :tangle terraform/instances.tf
 :END:
 + data
   - get the AMI names for the latest Amazon Linux AMI
@@ -499,25 +499,25 @@ data "aws_ssm_parameter" "linuxAmiOregon" {
 }
 #+end_src
 *** Set cloud-init Scripts
-**** [[./instances.tf]]
+**** [[./terraform/instances.tf]]
 :PROPERTIES:
-:header-args: :tangle instances.tf
+:header-args: :tangle terraform/instances.tf
 :END:
 + data
   - store cloud-init as data to pass to EC2 for boostrapping
 #+begin_src js
 data "template_file" "user_data" {
-  template = file("./scripts/cloud-init.yaml")
+  template = file("./terraform/scripts/cloud-init.yaml")
 }
 #+end_src
 *** Configure SSH keypairs for AMI VMs :keypair:
 - A key pair, consisting of a public key and a private key, is a set of security credentials that you use to prove your identity when connecting to an Amazon EC2 instance. Amazon EC2 stores the public key on your instance, and you store the private key. For Linux instances, the private key allows you to securely SSH into your instance. Anyone who possesses your private key can connect to your instances, so it's important that you store your private key in a secure place.
   + https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html
-**** [[./instances.tf]]
+**** [[./terraform/instances.tf]]
 :PROPERTIES:
-:header-args: :tangle instances.tf
+:header-args: :tangle terraform/instances.tf
 :END:
-+ assign keypairs for each region from [[./ssh/id_rsa.pub]]
++ assign keypairs for each region from [[./terraform/ssh/id_rsa.pub]]
 #+begin_src js
 #Create key-pair for logging into EC2 in us-east-1
 resource "aws_key_pair" "master-key" {
@@ -535,9 +535,9 @@ resource "aws_key_pair" "worker-key" {
 *** Create EC2 Instances :ec2:
 - Amazon Elastic Compute Cloud (Amazon EC2) is a web service that provides secure, resizable compute capacity in the cloud. It is designed to make web-scale cloud computing easier for developers.
   + https://aws.amazon.com/ec2/?ec2-whats-new.sort-by=item.additionalFields.postDateTime&ec2-whats-new.sort-order=desc
-**** [[./instances.tf]]
+**** [[./terraform/instances.tf]]
 :PROPERTIES:
-:header-args: :tangle instances.tf
+:header-args: :tangle terraform/instances.tf
 :END:
 #+begin_src js
 #Create and bootstrap EC2 in us-east-1
@@ -574,9 +574,9 @@ resource "aws_instance" "jenkins-worker-oregon" {
 * Bootstrap EC2 with cloud-init :cloudinit:
 - https://cloudinit.readthedocs.io/en/latest/
 - https://cloudinit.readthedocs.io/en/latest/topics/examples.html
-** [[./scripts/cloud-init.yaml]]
+** [[./terraform/scripts/cloud-init.yaml]]
 :PROPERTIES:
-:header-args: :tangle scripts/cloud-init.yaml
+:header-args: :tangle terraform/scripts/cloud-init.yaml
 :END:
 + install software
 + create users
