@@ -1,6 +1,6 @@
 #+TITLE: Deploying a Web App with AWS, Terraform, Cloud-init, Ansible and Jenkins
 #+SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
-#+OPTIONS: toc:2          (only include two levels in TOC)
+#+EXPORT_FILE_NAME: index.html
 See: https://edhilgendorf.github.io/tf-ans/
 * The project
 Project is to use this repository ( and possibly a couple others ) to build and deploy a web application using some core technologies:
@@ -584,13 +584,11 @@ package_upgrade: true
 packages:
   - awscli
   - tmux
-
 runcmd:
   - aws --version
   - echo "testing 1 two three"
-
 #+end_src
-* Verify your instance up to this point:
+* Verify project up to this point:
 #+begin_src sh
-ssh ec2-user@$(terraform output -json | jq  -r '."Jenkins-Main-Node-Public-IP"."value"') "grep "testing 1" /var/log/cloud-init-output.log"
+ssh -o StrictHostKeyChecking=no ec2-user@$(terraform output -json | jq  -r '."Jenkins-Main-Node-Public-IP"."value"') "sudo grep 'testing 1' /var/log/cloud-init-output.log"
 #+end_src
