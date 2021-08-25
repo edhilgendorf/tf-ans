@@ -38,6 +38,10 @@ The purpose of this is to build a cloud based project using IaC that explains *w
   #+begin_src python
 print ("hello world")
   #+end_src
+** File structure
+- Since Terraform runs are repo driven, anytime an update hits it will queue up a run. In order to save money on AWS, and lower the number of runs, create a working directory in Terraform Cloud, then relocate all Terraform code to that directory.
+  + https://www.terraform.io/docs/cloud/workspaces/settings.html
+- It is then possible to trigger runs only on working directories
 * Install Terraform :terraform:install:
 https://www.terraform.io/downloads.html
 * Install Packer -- (Unused in this project, at this time) :packer:install:
@@ -506,8 +510,9 @@ data "aws_ssm_parameter" "linuxAmiOregon" {
 + data
   - store cloud-init as data to pass to EC2 for boostrapping
 #+begin_src js
+#test
 data "template_file" "user_data" {
-  template = file("./terraform/scripts/cloud-init.yaml")
+  template = file("./scripts/cloud-init.yaml")
 }
 #+end_src
 *** Configure SSH keypairs for AMI VMs :keypair:

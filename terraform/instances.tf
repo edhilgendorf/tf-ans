@@ -10,7 +10,7 @@ data "aws_ssm_parameter" "linuxAmiOregon" {
 }
 
 data "template_file" "user_data" {
-  template = file("./terraform/scripts/cloud-init.yaml")
+  template = file("./scripts/cloud-init.yaml")
 }
 
 #Create key-pair for logging into EC2 in us-east-1
