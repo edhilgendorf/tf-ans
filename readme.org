@@ -230,6 +230,7 @@ resource "aws_internet_gateway" "igw-oregon" {
 data "aws_availability_zones" "azs" {
   provider = aws.region-master
   state    = "available"
+}
   #+end_src
 *** Create Subnets in our VPCs :subnet:
 - When you create a VPC, you must specify a range of IPv4 addresses for the VPC in the form of a Classless Inter-Domain Routing (CIDR) block; for example, 10.0.0.0/16. This is the primary CIDR block for your VPC. For more information about CIDR notation, see RFC 4632.

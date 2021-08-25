@@ -34,6 +34,7 @@ resource "aws_internet_gateway" "igw-oregon" {
 data "aws_availability_zones" "azs" {
   provider = aws.region-master
   state    = "available"
+}
 
   #create subnet #1 in us-east-1
   resource "aws_subnet" "subnet_1" {
