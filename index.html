@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-25 Wed 12:07 -->
+<!-- 2021-08-25 Wed 12:17 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Deploying a Web App with AWS, Terraform, Cloud-init, Ansible and Jenkins</title>
@@ -229,87 +229,87 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org856db88">1. The project</a>
+<li><a href="#org6f83513">1. The project</a>
 <ul>
-<li><a href="#orgd9b09c2">1.1. This Document</a></li>
-<li><a href="#org5b09839">1.2. Links</a></li>
+<li><a href="#org3ceb0c5">1.1. This Document</a></li>
+<li><a href="#org42fb507">1.2. Links</a></li>
 </ul>
 </li>
-<li><a href="#org1bb72fd">2. Conventions</a>
+<li><a href="#org6b34894">2. Conventions</a>
 <ul>
-<li><a href="#orga98a85a">2.1. syntax</a></li>
-<li><a href="#orgb357d60">2.2. Code Example</a>
+<li><a href="#orga413e05">2.1. syntax</a></li>
+<li><a href="#org49f23d5">2.2. Code Example</a>
 <ul>
-<li><a href="#org143a131">2.2.1. ./terraform/example_code.py &lt;&#x2013; the file that will be &ldquo;tangled&rdquo;, see This Document</a></li>
+<li><a href="#orgf2e514f">2.2.1. ./terraform/example_code.py &lt;&#x2013; the file that will be &ldquo;tangled&rdquo;, see This Document</a></li>
 </ul>
 </li>
-<li><a href="#orgbd26544">2.3. File structure</a></li>
+<li><a href="#org11e9c90">2.3. File structure</a></li>
 </ul>
 </li>
-<li><a href="#org744f859">3. Install Terraform&#xa0;&#xa0;&#xa0;<span class="tag"><span class="terraform">terraform</span>&#xa0;<span class="install">install</span></span></a></li>
-<li><a href="#org5d9792b">4. Install Packer &#x2013; (Unused in this project, at this time)&#xa0;&#xa0;&#xa0;<span class="tag"><span class="packer">packer</span>&#xa0;<span class="install">install</span></span></a></li>
-<li><a href="#org70df566">5. Configure AWS&#xa0;&#xa0;&#xa0;<span class="tag"><span class="aws">aws</span></span></a>
+<li><a href="#org9feaf0c">3. Install Terraform&#xa0;&#xa0;&#xa0;<span class="tag"><span class="terraform">terraform</span>&#xa0;<span class="install">install</span></span></a></li>
+<li><a href="#org8367ceb">4. Install Packer &#x2013; (Unused in this project, at this time)&#xa0;&#xa0;&#xa0;<span class="tag"><span class="packer">packer</span>&#xa0;<span class="install">install</span></span></a></li>
+<li><a href="#org716dc2c">5. Configure AWS&#xa0;&#xa0;&#xa0;<span class="tag"><span class="aws">aws</span></span></a>
 <ul>
-<li><a href="#orgd645b84">5.1. Setup AWS CLI&#xa0;&#xa0;&#xa0;<span class="tag"><span class="cli">cli</span>&#xa0;<span class="install">install</span></span></a></li>
-<li><a href="#org9f02206">5.2. Create IAM User and Policies&#xa0;&#xa0;&#xa0;<span class="tag"><span class="iam">iam</span></span></a>
+<li><a href="#org184e6b5">5.1. Setup AWS CLI&#xa0;&#xa0;&#xa0;<span class="tag"><span class="cli">cli</span>&#xa0;<span class="install">install</span></span></a></li>
+<li><a href="#orgf377c28">5.2. Create IAM User and Policies&#xa0;&#xa0;&#xa0;<span class="tag"><span class="iam">iam</span></span></a>
 <ul>
-<li><a href="#org7a699e3">5.2.1. attach a base policy&#xa0;&#xa0;&#xa0;<span class="tag"><span class="policy">policy</span></span></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#orgc75af76">6. Configure Terraform Cloud</a>
-<ul>
-<li><a href="#org8dc5ae0">6.1. ./terraform/backend.tf</a></li>
-</ul>
-</li>
-<li><a href="#orgdf7a96b">7. Create Infrastructure with Terraform&#xa0;&#xa0;&#xa0;<span class="tag"><span class="terraform">terraform</span>&#xa0;<span class="iac">iac</span></span></a>
-<ul>
-<li><a href="#org6c94a0e">7.1. Configure Providers</a>
-<ul>
-<li><a href="#org13d497f">7.1.1. ./terraform/providers.tf</a></li>
-</ul>
-</li>
-<li><a href="#orgd582056">7.2. Create variables&#xa0;&#xa0;&#xa0;<span class="tag"><span class="variables">variables</span></span></a>
-<ul>
-<li><a href="#orged4cacd">7.2.1. ./terraform/variables.tf</a></li>
-</ul>
-</li>
-<li><a href="#org7ca3b0f">7.3. Create a network&#xa0;&#xa0;&#xa0;<span class="tag"><span class="network">network</span></span></a>
-<ul>
-<li><a href="#orge2b9938">7.3.1. Create VPCs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="vpc">vpc</span></span></a></li>
-<li><a href="#orgabf3761">7.3.2. Create IGWs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="igw">igw</span></span></a></li>
-<li><a href="#orgb81cc63">7.3.3. Provide Data&#xa0;&#xa0;&#xa0;<span class="tag"><span class="data">data</span></span></a></li>
-<li><a href="#org837f978">7.3.4. Create Subnets in our VPCs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="subnet">subnet</span></span></a></li>
-<li><a href="#org309b71d">7.3.5. Create Peering between VPCs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="peering">peering</span></span></a></li>
-<li><a href="#org0cf1d35">7.3.6. Create Routing in and between VPCs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="route">route</span>&#xa0;<span class="vpc">vpc</span></span></a></li>
-<li><a href="#org902ecce">7.3.7. Create Security Groups&#xa0;&#xa0;&#xa0;<span class="tag"><span class="security_groups">security_groups</span></span></a></li>
-</ul>
-</li>
-<li><a href="#org47c7f51">7.4. Create Instances</a>
-<ul>
-<li><a href="#orge44f90b">7.4.1. Get AMIs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="ami">ami</span>&#xa0;<span class="vm">vm</span></span></a></li>
-<li><a href="#org4147ddf">7.4.2. Set cloud-init Scripts</a></li>
-<li><a href="#org24108f9">7.4.3. Configure SSH keypairs for AMI VMs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="keypair">keypair</span></span></a></li>
-<li><a href="#org0ac272c">7.4.4. Create EC2 Instances&#xa0;&#xa0;&#xa0;<span class="tag"><span class="ec2">ec2</span></span></a></li>
+<li><a href="#org3561ac4">5.2.1. attach a base policy&#xa0;&#xa0;&#xa0;<span class="tag"><span class="policy">policy</span></span></a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#orgea11e71">8. Bootstrap EC2 with cloud-init&#xa0;&#xa0;&#xa0;<span class="tag"><span class="cloudinit">cloudinit</span></span></a>
+<li><a href="#orgcb1421e">6. Configure Terraform Cloud</a>
 <ul>
-<li><a href="#org329b6bb">8.1. ./terraform/scripts/cloud-init.yaml</a></li>
+<li><a href="#org2ad4461">6.1. ./terraform/backend.tf</a></li>
 </ul>
 </li>
-<li><a href="#org9e6ce1c">9. Verify project up to this point</a></li>
+<li><a href="#orgc29f5a0">7. Create Infrastructure with Terraform&#xa0;&#xa0;&#xa0;<span class="tag"><span class="terraform">terraform</span>&#xa0;<span class="iac">iac</span></span></a>
+<ul>
+<li><a href="#org1104604">7.1. Configure Providers</a>
+<ul>
+<li><a href="#org420d437">7.1.1. ./terraform/providers.tf</a></li>
+</ul>
+</li>
+<li><a href="#org95d67e0">7.2. Create variables&#xa0;&#xa0;&#xa0;<span class="tag"><span class="variables">variables</span></span></a>
+<ul>
+<li><a href="#org8c9e226">7.2.1. ./terraform/variables.tf</a></li>
+</ul>
+</li>
+<li><a href="#org5fdb62e">7.3. Create a network&#xa0;&#xa0;&#xa0;<span class="tag"><span class="network">network</span></span></a>
+<ul>
+<li><a href="#orgf0e4241">7.3.1. Create VPCs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="vpc">vpc</span></span></a></li>
+<li><a href="#orga4f1958">7.3.2. Create IGWs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="igw">igw</span></span></a></li>
+<li><a href="#org993551e">7.3.3. Provide Data&#xa0;&#xa0;&#xa0;<span class="tag"><span class="data">data</span></span></a></li>
+<li><a href="#orga115590">7.3.4. Create Subnets in our VPCs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="subnet">subnet</span></span></a></li>
+<li><a href="#org70a1981">7.3.5. Create Peering between VPCs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="peering">peering</span></span></a></li>
+<li><a href="#orgb87dc12">7.3.6. Create Routing in and between VPCs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="route">route</span>&#xa0;<span class="vpc">vpc</span></span></a></li>
+<li><a href="#org91e0587">7.3.7. Create Security Groups&#xa0;&#xa0;&#xa0;<span class="tag"><span class="security_groups">security_groups</span></span></a></li>
+</ul>
+</li>
+<li><a href="#orgaa6c6e0">7.4. Create Instances</a>
+<ul>
+<li><a href="#org133a51b">7.4.1. Get AMIs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="ami">ami</span>&#xa0;<span class="vm">vm</span></span></a></li>
+<li><a href="#orgfd812d5">7.4.2. Set cloud-init Scripts</a></li>
+<li><a href="#org24ef3cd">7.4.3. Configure SSH keypairs for AMI VMs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="keypair">keypair</span></span></a></li>
+<li><a href="#orge602753">7.4.4. Create EC2 Instances&#xa0;&#xa0;&#xa0;<span class="tag"><span class="ec2">ec2</span></span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org066d131">8. Bootstrap EC2 with cloud-init&#xa0;&#xa0;&#xa0;<span class="tag"><span class="cloudinit">cloudinit</span></span></a>
+<ul>
+<li><a href="#org61a9a93">8.1. ./terraform/scripts/cloud-init.yaml</a></li>
+</ul>
+</li>
+<li><a href="#org9e6d50b">9. Verify project up to this point</a></li>
 </ul>
 </div>
 </div>
 <p>
 See: <a href="https://edhilgendorf.github.io/tf-ans/">https://edhilgendorf.github.io/tf-ans/</a>
 </p>
-<div id="outline-container-org856db88" class="outline-2">
-<h2 id="org856db88"><span class="section-number-2">1</span> The project</h2>
+<div id="outline-container-org6f83513" class="outline-2">
+<h2 id="org6f83513"><span class="section-number-2">1</span> The project</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 Project is to use this repository ( and possibly a couple others ) to build and deploy a web application using some core technologies:
@@ -323,8 +323,8 @@ Project is to use this repository ( and possibly a couple others ) to build and 
 <li>An application <i>(TBD)</i></li>
 </ul>
 </div>
-<div id="outline-container-orgd9b09c2" class="outline-3">
-<h3 id="orgd9b09c2"><span class="section-number-3">1.1</span> This Document</h3>
+<div id="outline-container-org3ceb0c5" class="outline-3">
+<h3 id="org3ceb0c5"><span class="section-number-3">1.1</span> This Document</h3>
 <div class="outline-text-3" id="text-1-1">
 <p>
 Documentation and code are built into this same <a href="https://orgmode.org/">orgmode</a> document. All the code in this repository is created from snippets in this document via org-tangle. The process is as follows:
@@ -341,8 +341,8 @@ The purpose of this is to build a cloud based project using IaC that explains <b
 </p>
 </div>
 </div>
-<div id="outline-container-org5b09839" class="outline-3">
-<h3 id="org5b09839"><span class="section-number-3">1.2</span> Links</h3>
+<div id="outline-container-org42fb507" class="outline-3">
+<h3 id="org42fb507"><span class="section-number-3">1.2</span> Links</h3>
 <div class="outline-text-3" id="text-1-2">
 <ul class="org-ul">
 <li><a href="https://github.com/edhilgendorf/tf-ans">Project GitHub</a></li>
@@ -352,12 +352,12 @@ The purpose of this is to build a cloud based project using IaC that explains <b
 </div>
 </div>
 </div>
-<div id="outline-container-org1bb72fd" class="outline-2">
-<h2 id="org1bb72fd"><span class="section-number-2">2</span> Conventions</h2>
+<div id="outline-container-org6b34894" class="outline-2">
+<h2 id="org6b34894"><span class="section-number-2">2</span> Conventions</h2>
 <div class="outline-text-2" id="text-2">
 </div>
-<div id="outline-container-orga98a85a" class="outline-3">
-<h3 id="orga98a85a"><span class="section-number-3">2.1</span> syntax</h3>
+<div id="outline-container-orga413e05" class="outline-3">
+<h3 id="orga413e05"><span class="section-number-3">2.1</span> syntax</h3>
 <div class="outline-text-3" id="text-2-1">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -382,16 +382,16 @@ The purpose of this is to build a cloud based project using IaC that explains <b
 </table>
 </div>
 </div>
-<div id="outline-container-orgb357d60" class="outline-3">
-<h3 id="orgb357d60"><span class="section-number-3">2.2</span> Code Example</h3>
+<div id="outline-container-org49f23d5" class="outline-3">
+<h3 id="org49f23d5"><span class="section-number-3">2.2</span> Code Example</h3>
 <div class="outline-text-3" id="text-2-2">
 <ul class="org-ul">
 <li>Each block will be named as above</li>
 <li>Following will be bullet points with an explanation and <i>hopefully</i> a link to the corresponding resource</li>
 </ul>
 </div>
-<div id="outline-container-org143a131" class="outline-4">
-<h4 id="org143a131"><span class="section-number-4">2.2.1</span> <a href="./terraform/example_code.py">./terraform/example_code.py</a> &lt;&#x2013; the file that will be &ldquo;tangled&rdquo;, see <a href="#orgd9b09c2">This Document</a></h4>
+<div id="outline-container-orgf2e514f" class="outline-4">
+<h4 id="orgf2e514f"><span class="section-number-4">2.2.1</span> <a href="./terraform/example_code.py">./terraform/example_code.py</a> &lt;&#x2013; the file that will be &ldquo;tangled&rdquo;, see <a href="#org3ceb0c5">This Document</a></h4>
 <div class="outline-text-4" id="text-2-2-1">
 <ul class="org-ul">
 <li><p>
@@ -405,8 +405,8 @@ This prints &ldquo;hello world&rdquo; to the user on execution
 </div>
 </div>
 </div>
-<div id="outline-container-orgbd26544" class="outline-3">
-<h3 id="orgbd26544"><span class="section-number-3">2.3</span> File structure</h3>
+<div id="outline-container-org11e9c90" class="outline-3">
+<h3 id="org11e9c90"><span class="section-number-3">2.3</span> File structure</h3>
 <div class="outline-text-3" id="text-2-3">
 <ul class="org-ul">
 <li>Since Terraform runs are repo driven, anytime an update hits it will queue up a run. In order to save money on AWS, and lower the number of runs, create a working directory in Terraform Cloud, then relocate all Terraform code to that directory.
@@ -419,16 +419,16 @@ This prints &ldquo;hello world&rdquo; to the user on execution
 </div>
 </div>
 </div>
-<div id="outline-container-org744f859" class="outline-2">
-<h2 id="org744f859"><span class="section-number-2">3</span> Install Terraform&#xa0;&#xa0;&#xa0;<span class="tag"><span class="terraform">terraform</span>&#xa0;<span class="install">install</span></span></h2>
+<div id="outline-container-org9feaf0c" class="outline-2">
+<h2 id="org9feaf0c"><span class="section-number-2">3</span> Install Terraform&#xa0;&#xa0;&#xa0;<span class="tag"><span class="terraform">terraform</span>&#xa0;<span class="install">install</span></span></h2>
 <div class="outline-text-2" id="text-3">
 <p>
 <a href="https://www.terraform.io/downloads.html">https://www.terraform.io/downloads.html</a>
 </p>
 </div>
 </div>
-<div id="outline-container-org5d9792b" class="outline-2">
-<h2 id="org5d9792b"><span class="section-number-2">4</span> Install Packer &#x2013; (Unused in this project, at this time)&#xa0;&#xa0;&#xa0;<span class="tag"><span class="packer">packer</span>&#xa0;<span class="install">install</span></span></h2>
+<div id="outline-container-org8367ceb" class="outline-2">
+<h2 id="org8367ceb"><span class="section-number-2">4</span> Install Packer &#x2013; (Unused in this project, at this time)&#xa0;&#xa0;&#xa0;<span class="tag"><span class="packer">packer</span>&#xa0;<span class="install">install</span></span></h2>
 <div class="outline-text-2" id="text-4">
 <div class="org-src-container">
 <pre class="src src-bash"><span style="color: #ECBE7B;">curl</span> -fsSL https://apt.releases.hashicorp.com/gpg | <span style="color: #ECBE7B;">sudo</span> apt-key add -
@@ -438,23 +438,23 @@ This prints &ldquo;hello world&rdquo; to the user on execution
 </div>
 </div>
 </div>
-<div id="outline-container-org70df566" class="outline-2">
-<h2 id="org70df566"><span class="section-number-2">5</span> Configure AWS&#xa0;&#xa0;&#xa0;<span class="tag"><span class="aws">aws</span></span></h2>
+<div id="outline-container-org716dc2c" class="outline-2">
+<h2 id="org716dc2c"><span class="section-number-2">5</span> Configure AWS&#xa0;&#xa0;&#xa0;<span class="tag"><span class="aws">aws</span></span></h2>
 <div class="outline-text-2" id="text-5">
 <ul class="org-ul">
 <li>Register account: <a href="https://portal.aws.amazon.com/gp/aws/developer/registration/index.html">https://portal.aws.amazon.com/gp/aws/developer/registration/index.html</a></li>
 </ul>
 </div>
-<div id="outline-container-orgd645b84" class="outline-3">
-<h3 id="orgd645b84"><span class="section-number-3">5.1</span> Setup AWS CLI&#xa0;&#xa0;&#xa0;<span class="tag"><span class="cli">cli</span>&#xa0;<span class="install">install</span></span></h3>
+<div id="outline-container-org184e6b5" class="outline-3">
+<h3 id="org184e6b5"><span class="section-number-3">5.1</span> Setup AWS CLI&#xa0;&#xa0;&#xa0;<span class="tag"><span class="cli">cli</span>&#xa0;<span class="install">install</span></span></h3>
 <div class="outline-text-3" id="text-5-1">
 <ul class="org-ul">
 <li><a href="https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html">https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org9f02206" class="outline-3">
-<h3 id="org9f02206"><span class="section-number-3">5.2</span> Create IAM User and Policies&#xa0;&#xa0;&#xa0;<span class="tag"><span class="iam">iam</span></span></h3>
+<div id="outline-container-orgf377c28" class="outline-3">
+<h3 id="orgf377c28"><span class="section-number-3">5.2</span> Create IAM User and Policies&#xa0;&#xa0;&#xa0;<span class="tag"><span class="iam">iam</span></span></h3>
 <div class="outline-text-3" id="text-5-2">
 <ul class="org-ul">
 <li>IAM: <a href="https://console.aws.amazon.com/iam/home">https://console.aws.amazon.com/iam/home</a></li>
@@ -480,8 +480,8 @@ Add user to <code>/.aws/credentials</code> as a profile:
 <a href="https://console.aws.amazon.com/iam/home?region=us-east-1#/security_credentials$access_key">https://console.aws.amazon.com/iam/home?region=us-east-1#/security_credentials$access_key</a></li>
 </ul>
 </div>
-<div id="outline-container-org7a699e3" class="outline-4">
-<h4 id="org7a699e3"><span class="section-number-4">5.2.1</span> attach a base policy&#xa0;&#xa0;&#xa0;<span class="tag"><span class="policy">policy</span></span></h4>
+<div id="outline-container-org3561ac4" class="outline-4">
+<h4 id="org3561ac4"><span class="section-number-4">5.2.1</span> attach a base policy&#xa0;&#xa0;&#xa0;<span class="tag"><span class="policy">policy</span></span></h4>
 <div class="outline-text-4" id="text-5-2-1">
 <p>
 <a href="./terraform/policies/base.json">./terraform/policies/base.json</a>
@@ -490,8 +490,8 @@ Add user to <code>/.aws/credentials</code> as a profile:
 </div>
 </div>
 </div>
-<div id="outline-container-orgc75af76" class="outline-2">
-<h2 id="orgc75af76"><span class="section-number-2">6</span> Configure Terraform Cloud</h2>
+<div id="outline-container-orgcb1421e" class="outline-2">
+<h2 id="orgcb1421e"><span class="section-number-2">6</span> Configure Terraform Cloud</h2>
 <div class="outline-text-2" id="text-6">
 <ul class="org-ul">
 <li>Regsiter account: <a href="https://app.terraform.io/signup/account?utm_source=terraform_io&amp;utm_content=terraform_cloud_top_nav">https://app.terraform.io/signup/account?utm_source=terraform_io&amp;utm_content=terraform_cloud_top_nav</a></li>
@@ -513,8 +513,8 @@ Add user to <code>/.aws/credentials</code> as a profile:
 <li>setup a backend remote pointing to your org/workspace</li>
 </ul>
 </div>
-<div id="outline-container-org8dc5ae0" class="outline-3">
-<h3 id="org8dc5ae0"><span class="section-number-3">6.1</span> <a href="./terraform/backend.tf">./terraform/backend.tf</a></h3>
+<div id="outline-container-org2ad4461" class="outline-3">
+<h3 id="org2ad4461"><span class="section-number-3">6.1</span> <a href="./terraform/backend.tf">./terraform/backend.tf</a></h3>
 <div class="outline-text-3" id="text-6-1">
 <div class="org-src-container">
 <pre class="src src-json">terraform {
@@ -530,36 +530,36 @@ Add user to <code>/.aws/credentials</code> as a profile:
 </div>
 </div>
 </div>
-<div id="outline-container-orgdf7a96b" class="outline-2">
-<h2 id="orgdf7a96b"><span class="section-number-2">7</span> Create Infrastructure with Terraform&#xa0;&#xa0;&#xa0;<span class="tag"><span class="terraform">terraform</span>&#xa0;<span class="iac">iac</span></span></h2>
+<div id="outline-container-orgc29f5a0" class="outline-2">
+<h2 id="orgc29f5a0"><span class="section-number-2">7</span> Create Infrastructure with Terraform&#xa0;&#xa0;&#xa0;<span class="tag"><span class="terraform">terraform</span>&#xa0;<span class="iac">iac</span></span></h2>
 <div class="outline-text-2" id="text-7">
 </div>
-<div id="outline-container-org6c94a0e" class="outline-3">
-<h3 id="org6c94a0e"><span class="section-number-3">7.1</span> Configure Providers</h3>
+<div id="outline-container-org1104604" class="outline-3">
+<h3 id="org1104604"><span class="section-number-3">7.1</span> Configure Providers</h3>
 <div class="outline-text-3" id="text-7-1">
 </div>
-<div id="outline-container-org13d497f" class="outline-4">
-<h4 id="org13d497f"><span class="section-number-4">7.1.1</span> <a href="./terraform/providers.tf">./terraform/providers.tf</a></h4>
+<div id="outline-container-org420d437" class="outline-4">
+<h4 id="org420d437"><span class="section-number-4">7.1.1</span> <a href="./terraform/providers.tf">./terraform/providers.tf</a></h4>
 <div class="outline-text-4" id="text-7-1-1">
 <div class="org-src-container">
-<pre class="src src-js">provider <span style="color: #98be65;">"aws"</span> {
-  #profile = <span style="color: #51afef;">var</span>.profile
-  region = <span style="color: #51afef;">var</span>.region-master
-  alias  = <span style="color: #98be65;">"region-master"</span>
+<pre class="src src-json">provider "aws" {
+  #profile = var.profile
+  region = var.region-master
+  alias  = "region-master"
 }
 
-provider <span style="color: #98be65;">"aws"</span> {
-  #profile = <span style="color: #51afef;">var</span>.profile
-  region = <span style="color: #51afef;">var</span>.region-worker
-  alias  = <span style="color: #98be65;">"region-worker"</span>
+provider "aws" {
+  #profile = var.profile
+  region = var.region-worker
+  alias  = "region-worker"
 }
 </pre>
 </div>
 </div>
 </div>
 </div>
-<div id="outline-container-orgd582056" class="outline-3">
-<h3 id="orgd582056"><span class="section-number-3">7.2</span> Create variables&#xa0;&#xa0;&#xa0;<span class="tag"><span class="variables">variables</span></span></h3>
+<div id="outline-container-org95d67e0" class="outline-3">
+<h3 id="org95d67e0"><span class="section-number-3">7.2</span> Create variables&#xa0;&#xa0;&#xa0;<span class="tag"><span class="variables">variables</span></span></h3>
 <div class="outline-text-3" id="text-7-2">
 <ul class="org-ul">
 <li>Input variables serve as parameters for a Terraform module, allowing aspects of the module to be customized without altering the module&rsquo;s own source code, and allowing modules to be shared between different configurations.
@@ -568,8 +568,8 @@ provider <span style="color: #98be65;">"aws"</span> {
 </ul></li>
 </ul>
 </div>
-<div id="outline-container-orged4cacd" class="outline-4">
-<h4 id="orged4cacd"><span class="section-number-4">7.2.1</span> <a href="./terraform/variables.tf">./terraform/variables.tf</a></h4>
+<div id="outline-container-org8c9e226" class="outline-4">
+<h4 id="org8c9e226"><span class="section-number-4">7.2.1</span> <a href="./terraform/variables.tf">./terraform/variables.tf</a></h4>
 <div class="outline-text-4" id="text-7-2-1">
 <ul class="org-ul">
 <li>profile and default user</li>
@@ -583,46 +583,46 @@ provider <span style="color: #98be65;">"aws"</span> {
 <li>instance type when deploying EC2</li>
 </ul>
 <div class="org-src-container">
-<pre class="src src-js">variable <span style="color: #98be65;">"profile"</span> {
+<pre class="src src-json">variable "profile" {
   type    = string
-  <span style="color: #51afef;">default</span> = <span style="color: #98be65;">"tf_user"</span>
+  default = "tf_user"
 }
-variable <span style="color: #98be65;">"region-master"</span> {
+variable "region-master" {
   type    = string
-  <span style="color: #51afef;">default</span> = <span style="color: #98be65;">"us-east-1"</span>
+  default = "us-east-1"
 }
-variable <span style="color: #98be65;">"region-worker"</span> {
+variable "region-worker" {
   type    = string
-  <span style="color: #51afef;">default</span> = <span style="color: #98be65;">"us-west-2"</span>
+  default = "us-west-2"
 }
-variable <span style="color: #98be65;">"test"</span> {
+variable "test" {
   type    = string
-  <span style="color: #51afef;">default</span> = <span style="color: #98be65;">"catheadbiscuit"</span>
+  default = "catheadbiscuit"
 }
-#Replace <span style="color: #51afef;">with</span> &lt;YOUR_EXTERNAL_IP&gt;  https:<span style="color: #5B6268;">//</span><span style="color: #5B6268;">ipv4.icanhazip.com</span>
-variable <span style="color: #98be65;">"external_ip"</span> {
+#Replace with &lt;YOUR_EXTERNAL_IP&gt;  https://ipv4.icanhazip.com
+variable "external_ip" {
   type    = string
-  <span style="color: #51afef;">default</span> = <span style="color: #98be65;">"0.0.0.0/0"</span>
+  default = "0.0.0.0/0"
 }
-variable <span style="color: #98be65;">"workers-count"</span> {
+variable "workers-count" {
   type    = number
-  <span style="color: #51afef;">default</span> = <span style="color: #da8548; font-weight: bold;">1</span>
+  default = 1
 }
-variable <span style="color: #98be65;">"instance-type"</span> {
+variable "instance-type" {
   type    = string
-  <span style="color: #51afef;">default</span> = <span style="color: #98be65;">"t3.micro"</span>
+  default = "t3.micro"
 }
 </pre>
 </div>
 </div>
 </div>
 </div>
-<div id="outline-container-org7ca3b0f" class="outline-3">
-<h3 id="org7ca3b0f"><span class="section-number-3">7.3</span> Create a network&#xa0;&#xa0;&#xa0;<span class="tag"><span class="network">network</span></span></h3>
+<div id="outline-container-org5fdb62e" class="outline-3">
+<h3 id="org5fdb62e"><span class="section-number-3">7.3</span> Create a network&#xa0;&#xa0;&#xa0;<span class="tag"><span class="network">network</span></span></h3>
 <div class="outline-text-3" id="text-7-3">
 </div>
-<div id="outline-container-orge2b9938" class="outline-4">
-<h4 id="orge2b9938"><span class="section-number-4">7.3.1</span> Create VPCs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="vpc">vpc</span></span></h4>
+<div id="outline-container-orgf0e4241" class="outline-4">
+<h4 id="orgf0e4241"><span class="section-number-4">7.3.1</span> Create VPCs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="vpc">vpc</span></span></h4>
 <div class="outline-text-4" id="text-7-3-1">
 <ul class="org-ul">
 <li>A virtual network dedicated to your AWS account.
@@ -632,7 +632,7 @@ variable <span style="color: #98be65;">"instance-type"</span> {
 </ul>
 </div>
 <ol class="org-ol">
-<li><a id="org42a76ae"></a><a href="./terraform/network.tf">./terraform/network.tf</a><br />
+<li><a id="org74358a7"></a><a href="./terraform/network.tf">./terraform/network.tf</a><br />
 <div class="outline-text-5" id="text-7-3-1-1">
 <ul class="org-ul">
 <li>VPCs
@@ -652,27 +652,27 @@ variable <span style="color: #98be65;">"instance-type"</span> {
 <li>tag as <code>worker-vpc-jenkins</code></li>
 </ul></li>
 </ul></li>
-<li>Variables come from: <a href="#orgd582056">Create variables</a></li>
+<li>Variables come from: <a href="#org95d67e0">Create variables</a></li>
 </ul>
 <div class="org-src-container">
-<pre class="src src-js">#Create VPC <span style="color: #51afef;">in</span> us-east-<span style="color: #da8548; font-weight: bold;">1</span>
-resource <span style="color: #98be65;">"aws_vpc"</span> <span style="color: #98be65;">"vpc_master"</span> {
+<pre class="src src-json">#Create VPC in us-east-1
+resource "aws_vpc" "vpc_master" {
   provider             = aws.region-master
-  cidr_block           = <span style="color: #98be65;">"10.0.0.0/16"</span>
-  enable_dns_support   = <span style="color: #a9a1e1;">true</span>
-  enable_dns_hostnames = <span style="color: #a9a1e1;">true</span>
+  cidr_block           = "10.0.0.0/16"
+  enable_dns_support   = true
+  enable_dns_hostnames = true
   tags = {
-    Name = <span style="color: #98be65;">"master-vpc-jenkins"</span>
+    Name = "master-vpc-jenkins"
   }
 }
-#Create VPC <span style="color: #51afef;">in</span> us-west-<span style="color: #da8548; font-weight: bold;">2</span>
-resource <span style="color: #98be65;">"aws_vpc"</span> <span style="color: #98be65;">"vpc_master_oregon"</span> {
+#Create VPC in us-west-2
+resource "aws_vpc" "vpc_master_oregon" {
   provider             = aws.region-worker
-  cidr_block           = <span style="color: #98be65;">"192.168.0.0/16"</span>
-  enable_dns_support   = <span style="color: #a9a1e1;">true</span>
-  enable_dns_hostnames = <span style="color: #a9a1e1;">true</span>
+  cidr_block           = "192.168.0.0/16"
+  enable_dns_support   = true
+  enable_dns_hostnames = true
   tags = {
-    Name = <span style="color: #98be65;">"worker-vpc-jenkins"</span>
+    Name = "worker-vpc-jenkins"
   }
 }
 </pre>
@@ -681,8 +681,8 @@ resource <span style="color: #98be65;">"aws_vpc"</span> <span style="color: #98b
 </li>
 </ol>
 </div>
-<div id="outline-container-orgabf3761" class="outline-4">
-<h4 id="orgabf3761"><span class="section-number-4">7.3.2</span> Create IGWs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="igw">igw</span></span></h4>
+<div id="outline-container-orga4f1958" class="outline-4">
+<h4 id="orga4f1958"><span class="section-number-4">7.3.2</span> Create IGWs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="igw">igw</span></span></h4>
 <div class="outline-text-4" id="text-7-3-2">
 <ul class="org-ul">
 <li>An internet gateway is a horizontally scaled, redundant, and highly available VPC component that allows communication between your VPC and the internet.
@@ -692,19 +692,19 @@ resource <span style="color: #98be65;">"aws_vpc"</span> <span style="color: #98b
 </ul>
 </div>
 <ol class="org-ol">
-<li><a id="orgd200db0"></a><a href="./terraform/network.tf">./terraform/network.tf</a><br />
+<li><a id="org816c789"></a><a href="./terraform/network.tf">./terraform/network.tf</a><br />
 <div class="outline-text-5" id="text-7-3-2-1">
 <ul class="org-ul">
 <li>create an internet gateway in each VPC, which reside in different availability zones (us-east-1 and us-west-2)</li>
 </ul>
 <div class="org-src-container">
-<pre class="src src-js">#Create IGW <span style="color: #51afef;">in</span> us-east-<span style="color: #da8548; font-weight: bold;">1</span>
-resource <span style="color: #98be65;">"aws_internet_gateway"</span> <span style="color: #98be65;">"igw"</span> {
+<pre class="src src-json">#Create IGW in us-east-1
+resource "aws_internet_gateway" "igw" {
   provider = aws.region-master
   vpc_id   = aws_vpc.vpc_master.id
 }
-#Create IGW <span style="color: #51afef;">in</span> us-west-<span style="color: #da8548; font-weight: bold;">2</span>
-resource <span style="color: #98be65;">"aws_internet_gateway"</span> <span style="color: #98be65;">"igw-oregon"</span> {
+#Create IGW in us-west-2
+resource "aws_internet_gateway" "igw-oregon" {
   provider = aws.region-worker
   vpc_id   = aws_vpc.vpc_master_oregon.id
 }
@@ -714,8 +714,8 @@ resource <span style="color: #98be65;">"aws_internet_gateway"</span> <span style
 </li>
 </ol>
 </div>
-<div id="outline-container-orgb81cc63" class="outline-4">
-<h4 id="orgb81cc63"><span class="section-number-4">7.3.3</span> Provide Data&#xa0;&#xa0;&#xa0;<span class="tag"><span class="data">data</span></span></h4>
+<div id="outline-container-org993551e" class="outline-4">
+<h4 id="org993551e"><span class="section-number-4">7.3.3</span> Provide Data&#xa0;&#xa0;&#xa0;<span class="tag"><span class="data">data</span></span></h4>
 <div class="outline-text-4" id="text-7-3-3">
 <ul class="org-ul">
 <li>Data sources allow Terraform use information defined outside of Terraform, defined by another separate Terraform configuration, or modified by functions.
@@ -725,16 +725,16 @@ resource <span style="color: #98be65;">"aws_internet_gateway"</span> <span style
 </ul>
 </div>
 <ol class="org-ol">
-<li><a id="org56d5f91"></a><a href="./terraform/network.tf">./terraform/network.tf</a><br />
+<li><a id="org97a390a"></a><a href="./terraform/network.tf">./terraform/network.tf</a><br />
 <div class="outline-text-5" id="text-7-3-3-1">
 <ul class="org-ul">
 <li>get <code>aws_availability_zones</code> that are in <code>state: available</code></li>
 </ul>
 <div class="org-src-container">
-<pre class="src src-js">#get all available AZs <span style="color: #51afef;">in</span> VPC <span style="color: #51afef;">for</span> master
-data <span style="color: #98be65;">"aws_availability_zones"</span> <span style="color: #98be65;">"azs"</span> {
+<pre class="src src-json">#get all available AZs in VPC for master
+data "aws_availability_zones" "azs" {
   provider = aws.region-master
-  state    = <span style="color: #98be65;">"available"</span>
+  state    = "available"
 }
 </pre>
 </div>
@@ -742,8 +742,8 @@ data <span style="color: #98be65;">"aws_availability_zones"</span> <span style="
 </li>
 </ol>
 </div>
-<div id="outline-container-org837f978" class="outline-4">
-<h4 id="org837f978"><span class="section-number-4">7.3.4</span> Create Subnets in our VPCs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="subnet">subnet</span></span></h4>
+<div id="outline-container-orga115590" class="outline-4">
+<h4 id="orga115590"><span class="section-number-4">7.3.4</span> Create Subnets in our VPCs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="subnet">subnet</span></span></h4>
 <div class="outline-text-4" id="text-7-3-4">
 <ul class="org-ul">
 <li>When you create a VPC, you must specify a range of IPv4 addresses for the VPC in the form of a Classless Inter-Domain Routing (CIDR) block; for example, 10.0.0.0/16. This is the primary CIDR block for your VPC. For more information about CIDR notation, see RFC 4632.
@@ -753,39 +753,39 @@ data <span style="color: #98be65;">"aws_availability_zones"</span> <span style="
 </ul>
 </div>
 <ol class="org-ol">
-<li><a id="org5a6cad7"></a><a href="./terraform/network.tf">./terraform/network.tf</a><br />
+<li><a id="org097b1df"></a><a href="./terraform/network.tf">./terraform/network.tf</a><br />
 <div class="outline-text-5" id="text-7-3-4-1">
 <ul class="org-ul">
-<li>two subnets in the master VPC defined in <a href="#orge2b9938">Create VPCs</a>.
+<li>two subnets in the master VPC defined in <a href="#orgf0e4241">Create VPCs</a>.
 <ul class="org-ul">
 <li><code>10.0.1.0/24</code></li>
 <li><code>10.0.2.0/24</code></li>
 </ul></li>
-<li>one subnet in the worker VPC defined in  <a href="#orge2b9938">Create VPCs</a>.
+<li>one subnet in the worker VPC defined in  <a href="#orgf0e4241">Create VPCs</a>.
 <ul class="org-ul">
 <li><code>192.168.1.0/24</code></li>
 </ul></li>
 </ul>
 <div class="org-src-container">
-<pre class="src src-js">  #create subnet #<span style="color: #da8548; font-weight: bold;">1</span> <span style="color: #51afef;">in</span> us-east-<span style="color: #da8548; font-weight: bold;">1</span>
-  resource <span style="color: #98be65;">"aws_subnet"</span> <span style="color: #98be65;">"subnet_1"</span> {
+<pre class="src src-json">  #create subnet #1 in us-east-1
+  resource "aws_subnet" "subnet_1" {
     provider          = aws.region-master
-    availability_zone = element(data.aws_availability_zones.azs.names, <span style="color: #da8548; font-weight: bold;">0</span>)
+    availability_zone = element(data.aws_availability_zones.azs.names, 0)
     vpc_id            = aws_vpc.vpc_master.id
-    cidr_block        = <span style="color: #98be65;">"10.0.1.0/24"</span>
+    cidr_block        = "10.0.1.0/24"
   }
-  #create subnet #<span style="color: #da8548; font-weight: bold;">2</span> <span style="color: #51afef;">in</span> us-east-<span style="color: #da8548; font-weight: bold;">1</span>
-  resource <span style="color: #98be65;">"aws_subnet"</span> <span style="color: #98be65;">"subnet_2"</span> {
+  #create subnet #2 in us-east-1
+  resource "aws_subnet" "subnet_2" {
     provider          = aws.region-master
-    availability_zone = element(data.aws_availability_zones.azs.names, <span style="color: #da8548; font-weight: bold;">1</span>)
+    availability_zone = element(data.aws_availability_zones.azs.names, 1)
     vpc_id            = aws_vpc.vpc_master.id
-    cidr_block        = <span style="color: #98be65;">"10.0.2.0/24"</span>
+    cidr_block        = "10.0.2.0/24"
   }
-  #create subnet #<span style="color: #da8548; font-weight: bold;">1</span> <span style="color: #51afef;">in</span> us-west-<span style="color: #da8548; font-weight: bold;">2</span>
-  resource <span style="color: #98be65;">"aws_subnet"</span> <span style="color: #98be65;">"subnet_1_oregon"</span> {
+  #create subnet #1 in us-west-2
+  resource "aws_subnet" "subnet_1_oregon" {
     provider   = aws.region-worker
     vpc_id     = aws_vpc.vpc_master_oregon.id
-    cidr_block = <span style="color: #98be65;">"192.168.1.0/24"</span>
+    cidr_block = "192.168.1.0/24"
   }
 </pre>
 </div>
@@ -793,8 +793,8 @@ data <span style="color: #98be65;">"aws_availability_zones"</span> <span style="
 </li>
 </ol>
 </div>
-<div id="outline-container-org309b71d" class="outline-4">
-<h4 id="org309b71d"><span class="section-number-4">7.3.5</span> Create Peering between VPCs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="peering">peering</span></span></h4>
+<div id="outline-container-org70a1981" class="outline-4">
+<h4 id="org70a1981"><span class="section-number-4">7.3.5</span> Create Peering between VPCs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="peering">peering</span></span></h4>
 <div class="outline-text-4" id="text-7-3-5">
 <ul class="org-ul">
 <li>A VPC peering connection is a networking connection between two VPCs that enables you to route traffic between them using private IPv4 addresses or IPv6 addresses.
@@ -804,26 +804,26 @@ data <span style="color: #98be65;">"aws_availability_zones"</span> <span style="
 </ul>
 </div>
 <ol class="org-ol">
-<li><a id="org4b071b7"></a><a href="./terraform/network.tf">./terraform/network.tf</a><br />
+<li><a id="org51325b2"></a><a href="./terraform/network.tf">./terraform/network.tf</a><br />
 <div class="outline-text-5" id="text-7-3-5-1">
 <ul class="org-ul">
 <li>Create a peering connection request from the master VPC.</li>
 <li>Create a peering connection acceptor from the worker VPC.</li>
 </ul>
 <div class="org-src-container">
-<pre class="src src-js">#Initiate Peering connection request from us-east-<span style="color: #da8548; font-weight: bold;">1</span>
-resource <span style="color: #98be65;">"aws_vpc_peering_connection"</span> <span style="color: #98be65;">"useast1-uswest2"</span> {
+<pre class="src src-json">#Initiate Peering connection request from us-east-1
+resource "aws_vpc_peering_connection" "useast1-uswest2" {
   provider    = aws.region-master
   peer_vpc_id = aws_vpc.vpc_master_oregon.id
   vpc_id      = aws_vpc.vpc_master.id
-  peer_region = <span style="color: #51afef;">var</span>.region-worker
+  peer_region = var.region-worker
 
 }
-#Accept VPC peering request <span style="color: #51afef;">in</span> us-west-<span style="color: #da8548; font-weight: bold;">2</span> from us-east-<span style="color: #da8548; font-weight: bold;">1</span>
-resource <span style="color: #98be65;">"aws_vpc_peering_connection_accepter"</span> <span style="color: #98be65;">"accept_peering"</span> {
+#Accept VPC peering request in us-west-2 from us-east-1
+resource "aws_vpc_peering_connection_accepter" "accept_peering" {
   provider                  = aws.region-worker
   vpc_peering_connection_id = aws_vpc_peering_connection.useast1-uswest2.id
-  auto_accept               = <span style="color: #a9a1e1;">true</span>
+  auto_accept               = true
 }
 </pre>
 </div>
@@ -831,8 +831,8 @@ resource <span style="color: #98be65;">"aws_vpc_peering_connection_accepter"</sp
 </li>
 </ol>
 </div>
-<div id="outline-container-org0cf1d35" class="outline-4">
-<h4 id="org0cf1d35"><span class="section-number-4">7.3.6</span> Create Routing in and between VPCs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="route">route</span>&#xa0;<span class="vpc">vpc</span></span></h4>
+<div id="outline-container-orgb87dc12" class="outline-4">
+<h4 id="orgb87dc12"><span class="section-number-4">7.3.6</span> Create Routing in and between VPCs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="route">route</span>&#xa0;<span class="vpc">vpc</span></span></h4>
 <div class="outline-text-4" id="text-7-3-6">
 <ul class="org-ul">
 <li>A route table contains a set of rules, called routes, that are used to determine where network traffic from your subnet or gateway is directed.
@@ -842,69 +842,69 @@ resource <span style="color: #98be65;">"aws_vpc_peering_connection_accepter"</sp
 </ul>
 </div>
 <ol class="org-ol">
-<li><a id="org32ef738"></a><a href="./terraform/network.tf">./terraform/network.tf</a><br />
+<li><a id="orgf91fb25"></a><a href="./terraform/network.tf">./terraform/network.tf</a><br />
 <div class="outline-text-5" id="text-7-3-6-1">
 <ul class="org-ul">
 <li>create a routing table for the master VPC
 <ul class="org-ul">
 <li>to internet via <code>aws_internet_gateway.igw.id</code></li>
-<li>to the worker VPC Peering Connection created in:  <a href="#org309b71d">Create Peering between VPCs</a></li>
+<li>to the worker VPC Peering Connection created in:  <a href="#org70a1981">Create Peering between VPCs</a></li>
 </ul></li>
 <li>replace default route of the master VPC with the routing table created above</li>
 <li>create routing table for worker VPC
 <ul class="org-ul">
 <li>to internet via <code>aws_internet_gateway.igw.id</code></li>
-<li>to the master VPC Peering Connection created in:  <a href="#org309b71d">Create Peering between VPCs</a></li>
+<li>to the master VPC Peering Connection created in:  <a href="#org70a1981">Create Peering between VPCs</a></li>
 </ul></li>
 <li>replace default route of the worker VPC with the routing table created above</li>
 </ul>
 <div class="org-src-container">
-<pre class="src src-js">#Create route table <span style="color: #51afef;">in</span> us-east-<span style="color: #da8548; font-weight: bold;">1</span>
-resource <span style="color: #98be65;">"aws_route_table"</span> <span style="color: #98be65;">"internet_route"</span> {
+<pre class="src src-json">#Create route table in us-east-1
+resource "aws_route_table" "internet_route" {
   provider = aws.region-master
   vpc_id   = aws_vpc.vpc_master.id
   route {
-    cidr_block = <span style="color: #98be65;">"0.0.0.0/0"</span>
+    cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.igw.id
   }
   route {
-    cidr_block                = <span style="color: #98be65;">"192.168.1.0/24"</span>
+    cidr_block                = "192.168.1.0/24"
     vpc_peering_connection_id = aws_vpc_peering_connection.useast1-uswest2.id
   }
   lifecycle {
     ignore_changes = all
   }
   tags = {
-    Name = <span style="color: #98be65;">"Master-Region-RT"</span>
+    Name = "Master-Region-RT"
   }
 }
-#Overwrite <span style="color: #51afef;">default</span> route table of VPC(Master) <span style="color: #51afef;">with</span> our route table entries
-resource <span style="color: #98be65;">"aws_main_route_table_association"</span> <span style="color: #98be65;">"set-master-default-rt-assoc"</span> {
+#Overwrite default route table of VPC(Master) with our route table entries
+resource "aws_main_route_table_association" "set-master-default-rt-assoc" {
   provider       = aws.region-master
   vpc_id         = aws_vpc.vpc_master.id
   route_table_id = aws_route_table.internet_route.id
 }
-#Create route table <span style="color: #51afef;">in</span> us-west-<span style="color: #da8548; font-weight: bold;">2</span>
-resource <span style="color: #98be65;">"aws_route_table"</span> <span style="color: #98be65;">"internet_route_oregon"</span> {
+#Create route table in us-west-2
+resource "aws_route_table" "internet_route_oregon" {
   provider = aws.region-worker
   vpc_id   = aws_vpc.vpc_master_oregon.id
   route {
-    cidr_block = <span style="color: #98be65;">"0.0.0.0/0"</span>
+    cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.igw-oregon.id
   }
   route {
-    cidr_block                = <span style="color: #98be65;">"10.0.1.0/24"</span>
+    cidr_block                = "10.0.1.0/24"
     vpc_peering_connection_id = aws_vpc_peering_connection.useast1-uswest2.id
   }
   lifecycle {
     ignore_changes = all
   }
   tags = {
-    Name = <span style="color: #98be65;">"Worker-Region-RT"</span>
+    Name = "Worker-Region-RT"
   }
 }
-#Overwrite <span style="color: #51afef;">default</span> route table of VPC(Worker) <span style="color: #51afef;">with</span> our route table entries
-resource <span style="color: #98be65;">"aws_main_route_table_association"</span> <span style="color: #98be65;">"set-worker-default-rt-assoc"</span> {
+#Overwrite default route table of VPC(Worker) with our route table entries
+resource "aws_main_route_table_association" "set-worker-default-rt-assoc" {
   provider       = aws.region-worker
   vpc_id         = aws_vpc.vpc_master_oregon.id
   route_table_id = aws_route_table.internet_route_oregon.id
@@ -915,8 +915,8 @@ resource <span style="color: #98be65;">"aws_main_route_table_association"</span>
 </li>
 </ol>
 </div>
-<div id="outline-container-org902ecce" class="outline-4">
-<h4 id="org902ecce"><span class="section-number-4">7.3.7</span> Create Security Groups&#xa0;&#xa0;&#xa0;<span class="tag"><span class="security_groups">security_groups</span></span></h4>
+<div id="outline-container-org91e0587" class="outline-4">
+<h4 id="org91e0587"><span class="section-number-4">7.3.7</span> Create Security Groups&#xa0;&#xa0;&#xa0;<span class="tag"><span class="security_groups">security_groups</span></span></h4>
 <div class="outline-text-4" id="text-7-3-7">
 <ul class="org-ul">
 <li>A security group acts as a virtual firewall for your instance to control inbound and outbound traffic.
@@ -926,7 +926,7 @@ resource <span style="color: #98be65;">"aws_main_route_table_association"</span>
 </ul>
 </div>
 <ol class="org-ol">
-<li><a id="orgb717bc9"></a><a href="./terraform/security_groups.tf">./terraform/security_groups.tf</a><br />
+<li><a id="orga02cbb8"></a><a href="./terraform/security_groups.tf">./terraform/security_groups.tf</a><br />
 <div class="outline-text-5" id="text-7-3-7-1">
 <ul class="org-ul">
 <li>create a SG for the: TODO Application Load Balancer TODO
@@ -939,104 +939,104 @@ resource <span style="color: #98be65;">"aws_main_route_table_association"</span>
 <li>allow in from 80/443 web ports.</li>
 <li>allow out anywhere for ephemeral ports.</li>
 <li>allow ssh from port 22 from our home IP</li>
-<li>allow in from us-west-2 (worker) subnet created in  <a href="#org837f978">Create Subnets in our VPCs</a></li>
+<li>allow in from us-west-2 (worker) subnet created in  <a href="#orga115590">Create Subnets in our VPCs</a></li>
 </ul></li>
 <li>create a security group for Jenkins in VPC worker
 <ul class="org-ul">
 <li>allow in from 80/443 web ports.</li>
 <li>allow out anywhere for ephemeral ports.</li>
 <li>allow ssh from port 22 from our home IP</li>
-<li>allow in from us-east-1 (master) subnet created in  <a href="#org837f978">Create Subnets in our VPCs</a></li>
+<li>allow in from us-east-1 (master) subnet created in  <a href="#orga115590">Create Subnets in our VPCs</a></li>
 </ul></li>
 </ul>
 <div class="org-src-container">
-<pre class="src src-js">#Create SG <span style="color: #51afef;">for</span> LB, only TCP/<span style="color: #da8548; font-weight: bold;">80</span>,TCP/<span style="color: #da8548; font-weight: bold;">443</span> and outbound access
-resource <span style="color: #98be65;">"aws_security_group"</span> <span style="color: #98be65;">"lb-sg"</span> {
+<pre class="src src-json">#Create SG for LB, only TCP/80,TCP/443 and outbound access
+resource "aws_security_group" "lb-sg" {
   provider    = aws.region-master
-  name        = <span style="color: #98be65;">"lb-sg"</span>
-  description = <span style="color: #98be65;">"Allow 443 and traffic to Jenkins SG"</span>
+  name        = "lb-sg"
+  description = "Allow 443 and traffic to Jenkins SG"
   vpc_id      = aws_vpc.vpc_master.id
   ingress {
-    description = <span style="color: #98be65;">"Allow 443 from anywhere"</span>
-    from_port   = <span style="color: #da8548; font-weight: bold;">443</span>
-    to_port     = <span style="color: #da8548; font-weight: bold;">443</span>
-    protocol    = <span style="color: #98be65;">"tcp"</span>
-    cidr_blocks = [<span style="color: #98be65;">"0.0.0.0/0"</span>]
+    description = "Allow 443 from anywhere"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
   ingress {
-    description = <span style="color: #98be65;">"Allow 80 from anywhere for redirection"</span>
-    from_port   = <span style="color: #da8548; font-weight: bold;">80</span>
-    to_port     = <span style="color: #da8548; font-weight: bold;">80</span>
-    protocol    = <span style="color: #98be65;">"tcp"</span>
-    cidr_blocks = [<span style="color: #98be65;">"0.0.0.0/0"</span>]
+    description = "Allow 80 from anywhere for redirection"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
   egress {
-    from_port   = <span style="color: #da8548; font-weight: bold;">0</span>
-    to_port     = <span style="color: #da8548; font-weight: bold;">0</span>
-    protocol    = <span style="color: #98be65;">"-1"</span>
-    cidr_blocks = [<span style="color: #98be65;">"0.0.0.0/0"</span>]
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
-#Create SG <span style="color: #51afef;">for</span> allowing TCP/<span style="color: #da8548; font-weight: bold;">8080</span> from * and TCP/<span style="color: #da8548; font-weight: bold;">22</span> from your IP <span style="color: #51afef;">in</span> us-east-<span style="color: #da8548; font-weight: bold;">1</span>
-resource <span style="color: #98be65;">"aws_security_group"</span> <span style="color: #98be65;">"jenkins-sg"</span> {
+#Create SG for allowing TCP/8080 from * and TCP/22 from your IP in us-east-1
+resource "aws_security_group" "jenkins-sg" {
   provider    = aws.region-master
-  name        = <span style="color: #98be65;">"jenkins-sg"</span>
-  description = <span style="color: #98be65;">"Allow TCP/8080 &amp; TCP/22"</span>
+  name        = "jenkins-sg"
+  description = "Allow TCP/8080 &amp; TCP/22"
   vpc_id      = aws_vpc.vpc_master.id
   ingress {
-    description = <span style="color: #98be65;">"Allow 22 from our public IP"</span>
-    from_port   = <span style="color: #da8548; font-weight: bold;">22</span>
-    to_port     = <span style="color: #da8548; font-weight: bold;">22</span>
-    protocol    = <span style="color: #98be65;">"tcp"</span>
-    cidr_blocks = [<span style="color: #51afef;">var</span>.external_ip]
+    description = "Allow 22 from our public IP"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [var.external_ip]
   }
   ingress {
-    description     = <span style="color: #98be65;">"allow anyone on port 8080"</span>
-    from_port       = <span style="color: #da8548; font-weight: bold;">8080</span>
-    to_port         = <span style="color: #da8548; font-weight: bold;">8080</span>
-    protocol        = <span style="color: #98be65;">"tcp"</span>
+    description     = "allow anyone on port 8080"
+    from_port       = 8080
+    to_port         = 8080
+    protocol        = "tcp"
     security_groups = [aws_security_group.lb-sg.id]
   }
   ingress {
-    description = <span style="color: #98be65;">"allow traffic from us-west-2"</span>
-    from_port   = <span style="color: #da8548; font-weight: bold;">0</span>
-    to_port     = <span style="color: #da8548; font-weight: bold;">0</span>
-    protocol    = <span style="color: #98be65;">"-1"</span>
-    cidr_blocks = [<span style="color: #98be65;">"192.168.1.0/24"</span>]
+    description = "allow traffic from us-west-2"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["192.168.1.0/24"]
   }
   egress {
-    from_port   = <span style="color: #da8548; font-weight: bold;">0</span>
-    to_port     = <span style="color: #da8548; font-weight: bold;">0</span>
-    protocol    = <span style="color: #98be65;">"-1"</span>
-    cidr_blocks = [<span style="color: #98be65;">"0.0.0.0/0"</span>]
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
-#Create SG <span style="color: #51afef;">for</span> allowing TCP/<span style="color: #da8548; font-weight: bold;">22</span> from your IP <span style="color: #51afef;">in</span> us-west-<span style="color: #da8548; font-weight: bold;">2</span>
-resource <span style="color: #98be65;">"aws_security_group"</span> <span style="color: #98be65;">"jenkins-sg-oregon"</span> {
+#Create SG for allowing TCP/22 from your IP in us-west-2
+resource "aws_security_group" "jenkins-sg-oregon" {
   provider = aws.region-worker
 
-  name        = <span style="color: #98be65;">"jenkins-sg-oregon"</span>
-  description = <span style="color: #98be65;">"Allow TCP/8080 &amp; TCP/22"</span>
+  name        = "jenkins-sg-oregon"
+  description = "Allow TCP/8080 &amp; TCP/22"
   vpc_id      = aws_vpc.vpc_master_oregon.id
   ingress {
-    description = <span style="color: #98be65;">"Allow 22 from our public IP"</span>
-    from_port   = <span style="color: #da8548; font-weight: bold;">22</span>
-    to_port     = <span style="color: #da8548; font-weight: bold;">22</span>
-    protocol    = <span style="color: #98be65;">"tcp"</span>
-    cidr_blocks = [<span style="color: #51afef;">var</span>.external_ip]
+    description = "Allow 22 from our public IP"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [var.external_ip]
   }
   ingress {
-    description = <span style="color: #98be65;">"Allow traffic from us-east-1"</span>
-    from_port   = <span style="color: #da8548; font-weight: bold;">0</span>
-    to_port     = <span style="color: #da8548; font-weight: bold;">0</span>
-    protocol    = <span style="color: #98be65;">"-1"</span>
-    cidr_blocks = [<span style="color: #98be65;">"10.0.1.0/24"</span>]
+    description = "Allow traffic from us-east-1"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["10.0.1.0/24"]
   }
   egress {
-    from_port   = <span style="color: #da8548; font-weight: bold;">0</span>
-    to_port     = <span style="color: #da8548; font-weight: bold;">0</span>
-    protocol    = <span style="color: #98be65;">"-1"</span>
-    cidr_blocks = [<span style="color: #98be65;">"0.0.0.0/0"</span>]
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
 </pre>
@@ -1046,12 +1046,12 @@ resource <span style="color: #98be65;">"aws_security_group"</span> <span style="
 </ol>
 </div>
 </div>
-<div id="outline-container-org47c7f51" class="outline-3">
-<h3 id="org47c7f51"><span class="section-number-3">7.4</span> Create Instances</h3>
+<div id="outline-container-orgaa6c6e0" class="outline-3">
+<h3 id="orgaa6c6e0"><span class="section-number-3">7.4</span> Create Instances</h3>
 <div class="outline-text-3" id="text-7-4">
 </div>
-<div id="outline-container-orge44f90b" class="outline-4">
-<h4 id="orge44f90b"><span class="section-number-4">7.4.1</span> Get AMIs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="ami">ami</span>&#xa0;<span class="vm">vm</span></span></h4>
+<div id="outline-container-org133a51b" class="outline-4">
+<h4 id="org133a51b"><span class="section-number-4">7.4.1</span> Get AMIs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="ami">ami</span>&#xa0;<span class="vm">vm</span></span></h4>
 <div class="outline-text-4" id="text-7-4-1">
 <ul class="org-ul">
 <li>An Amazon Machine Image (AMI) provides the information required to launch an instance.
@@ -1061,7 +1061,7 @@ resource <span style="color: #98be65;">"aws_security_group"</span> <span style="
 </ul>
 </div>
 <ol class="org-ol">
-<li><a id="org2a8349e"></a><a href="./terraform/instances.tf">./terraform/instances.tf</a><br />
+<li><a id="org4bebeba"></a><a href="./terraform/instances.tf">./terraform/instances.tf</a><br />
 <div class="outline-text-5" id="text-7-4-1-1">
 <ul class="org-ul">
 <li>data
@@ -1072,15 +1072,15 @@ resource <span style="color: #98be65;">"aws_security_group"</span> <span style="
 </ul></li>
 </ul>
 <div class="org-src-container">
-<pre class="src src-js">#Get Linux AMI ID using SSM Parameter endpoint <span style="color: #51afef;">in</span> us-east-<span style="color: #da8548; font-weight: bold;">1</span>
-data <span style="color: #98be65;">"aws_ssm_parameter"</span> <span style="color: #98be65;">"linuxAmi"</span> {
+<pre class="src src-json">#Get Linux AMI ID using SSM Parameter endpoint in us-east-1
+data "aws_ssm_parameter" "linuxAmi" {
   provider = aws.region-master
-  name     = <span style="color: #98be65;">"/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"</span>
+  name     = "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
 }
-#Get Linux AMI ID using SSM Parameter endpoint <span style="color: #51afef;">in</span> us-west-<span style="color: #da8548; font-weight: bold;">2</span>
-data <span style="color: #98be65;">"aws_ssm_parameter"</span> <span style="color: #98be65;">"linuxAmiOregon"</span> {
+#Get Linux AMI ID using SSM Parameter endpoint in us-west-2
+data "aws_ssm_parameter" "linuxAmiOregon" {
   provider = aws.region-worker
-  name     = <span style="color: #98be65;">"/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"</span>
+  name     = "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
 }
 </pre>
 </div>
@@ -1088,12 +1088,12 @@ data <span style="color: #98be65;">"aws_ssm_parameter"</span> <span style="color
 </li>
 </ol>
 </div>
-<div id="outline-container-org4147ddf" class="outline-4">
-<h4 id="org4147ddf"><span class="section-number-4">7.4.2</span> Set cloud-init Scripts</h4>
+<div id="outline-container-orgfd812d5" class="outline-4">
+<h4 id="orgfd812d5"><span class="section-number-4">7.4.2</span> Set cloud-init Scripts</h4>
 <div class="outline-text-4" id="text-7-4-2">
 </div>
 <ol class="org-ol">
-<li><a id="org3602315"></a><a href="./terraform/instances.tf">./terraform/instances.tf</a><br />
+<li><a id="orga13cfd4"></a><a href="./terraform/instances.tf">./terraform/instances.tf</a><br />
 <div class="outline-text-5" id="text-7-4-2-1">
 <ul class="org-ul">
 <li>data
@@ -1102,8 +1102,8 @@ data <span style="color: #98be65;">"aws_ssm_parameter"</span> <span style="color
 </ul></li>
 </ul>
 <div class="org-src-container">
-<pre class="src src-js">data <span style="color: #98be65;">"template_file"</span> <span style="color: #98be65;">"user_data"</span> {
-  template = file(<span style="color: #98be65;">"./scripts/cloud-init.yaml"</span>)
+<pre class="src src-json">data "template_file" "user_data" {
+  template = file("./scripts/cloud-init.yaml")
 }
 </pre>
 </div>
@@ -1111,8 +1111,8 @@ data <span style="color: #98be65;">"aws_ssm_parameter"</span> <span style="color
 </li>
 </ol>
 </div>
-<div id="outline-container-org24108f9" class="outline-4">
-<h4 id="org24108f9"><span class="section-number-4">7.4.3</span> Configure SSH keypairs for AMI VMs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="keypair">keypair</span></span></h4>
+<div id="outline-container-org24ef3cd" class="outline-4">
+<h4 id="org24ef3cd"><span class="section-number-4">7.4.3</span> Configure SSH keypairs for AMI VMs&#xa0;&#xa0;&#xa0;<span class="tag"><span class="keypair">keypair</span></span></h4>
 <div class="outline-text-4" id="text-7-4-3">
 <ul class="org-ul">
 <li>A key pair, consisting of a public key and a private key, is a set of security credentials that you use to prove your identity when connecting to an Amazon EC2 instance. Amazon EC2 stores the public key on your instance, and you store the private key. For Linux instances, the private key allows you to securely SSH into your instance. Anyone who possesses your private key can connect to your instances, so it&rsquo;s important that you store your private key in a secure place.
@@ -1122,23 +1122,23 @@ data <span style="color: #98be65;">"aws_ssm_parameter"</span> <span style="color
 </ul>
 </div>
 <ol class="org-ol">
-<li><a id="org3c32785"></a><a href="./terraform/instances.tf">./terraform/instances.tf</a><br />
+<li><a id="org808910a"></a><a href="./terraform/instances.tf">./terraform/instances.tf</a><br />
 <div class="outline-text-5" id="text-7-4-3-1">
 <ul class="org-ul">
 <li>assign keypairs for each region from <a href="./terraform/ssh/id_rsa.pub">./terraform/ssh/id_rsa.pub</a></li>
 </ul>
 <div class="org-src-container">
-<pre class="src src-js">#Create key-pair <span style="color: #51afef;">for</span> logging into EC2 <span style="color: #51afef;">in</span> us-east-<span style="color: #da8548; font-weight: bold;">1</span>
-resource <span style="color: #98be65;">"aws_key_pair"</span> <span style="color: #98be65;">"master-key"</span> {
+<pre class="src src-json">#Create key-pair for logging into EC2 in us-east-1
+resource "aws_key_pair" "master-key" {
   provider = aws.region-master
-  key_name = <span style="color: #98be65;">"jenkins"</span>
-  public_key = file(<span style="color: #98be65;">"ssh/id_rsa.pub"</span>)
+  key_name = "jenkins"
+  public_key = file("ssh/id_rsa.pub")
 }
-#Create key-pair <span style="color: #51afef;">for</span> logging into EC2 <span style="color: #51afef;">in</span> us-west-<span style="color: #da8548; font-weight: bold;">2</span>
-resource <span style="color: #98be65;">"aws_key_pair"</span> <span style="color: #98be65;">"worker-key"</span> {
+#Create key-pair for logging into EC2 in us-west-2
+resource "aws_key_pair" "worker-key" {
   provider = aws.region-worker
-  key_name = <span style="color: #98be65;">"jenkins"</span>
-  public_key = file(<span style="color: #98be65;">"ssh/id_rsa.pub"</span>)
+  key_name = "jenkins"
+  public_key = file("ssh/id_rsa.pub")
 }
 </pre>
 </div>
@@ -1146,8 +1146,8 @@ resource <span style="color: #98be65;">"aws_key_pair"</span> <span style="color:
 </li>
 </ol>
 </div>
-<div id="outline-container-org0ac272c" class="outline-4">
-<h4 id="org0ac272c"><span class="section-number-4">7.4.4</span> Create EC2 Instances&#xa0;&#xa0;&#xa0;<span class="tag"><span class="ec2">ec2</span></span></h4>
+<div id="outline-container-orge602753" class="outline-4">
+<h4 id="orge602753"><span class="section-number-4">7.4.4</span> Create EC2 Instances&#xa0;&#xa0;&#xa0;<span class="tag"><span class="ec2">ec2</span></span></h4>
 <div class="outline-text-4" id="text-7-4-4">
 <ul class="org-ul">
 <li>Amazon Elastic Compute Cloud (Amazon EC2) is a web service that provides secure, resizable compute capacity in the cloud. It is designed to make web-scale cloud computing easier for developers.
@@ -1157,38 +1157,38 @@ resource <span style="color: #98be65;">"aws_key_pair"</span> <span style="color:
 </ul>
 </div>
 <ol class="org-ol">
-<li><a id="orgea99dd6"></a><a href="./terraform/instances.tf">./terraform/instances.tf</a><br />
+<li><a id="orgf102a5f"></a><a href="./terraform/instances.tf">./terraform/instances.tf</a><br />
 <div class="outline-text-5" id="text-7-4-4-1">
 <div class="org-src-container">
-<pre class="src src-js">#Create and bootstrap EC2 <span style="color: #51afef;">in</span> us-east-<span style="color: #da8548; font-weight: bold;">1</span>
-resource <span style="color: #98be65;">"aws_instance"</span> <span style="color: #98be65;">"jenkins-master"</span> {
+<pre class="src src-json">#Create and bootstrap EC2 in us-east-1
+resource "aws_instance" "jenkins-master" {
   provider                    = aws.region-master
   ami                         = data.aws_ssm_parameter.linuxAmi.value
-  instance_type               = <span style="color: #51afef;">var</span>.instance-type
+  instance_type               = var.instance-type
   key_name                    = aws_key_pair.master-key.key_name
-  associate_public_ip_address = <span style="color: #a9a1e1;">true</span>
+  associate_public_ip_address = true
   vpc_security_group_ids      = [aws_security_group.jenkins-sg.id]
   subnet_id                   = aws_subnet.subnet_1.id
   user_data                   = data.template_file.user_data.rendered
   tags = {
-    Name = <span style="color: #98be65;">"jenkins_master_tf"</span>
+    Name = "jenkins_master_tf"
   }
-  depends_on = [aws_main_route_table_association.set-master-<span style="color: #51afef;">default</span>-rt-assoc]
+  depends_on = [aws_main_route_table_association.set-master-default-rt-assoc]
 }
-#Create EC2 <span style="color: #51afef;">in</span> us-west-<span style="color: #da8548; font-weight: bold;">2</span>
-resource <span style="color: #98be65;">"aws_instance"</span> <span style="color: #98be65;">"jenkins-worker-oregon"</span> {
+#Create EC2 in us-west-2
+resource "aws_instance" "jenkins-worker-oregon" {
   provider                    = aws.region-worker
-  count                       = <span style="color: #51afef;">var</span>.workers-count
+  count                       = var.workers-count
   ami                         = data.aws_ssm_parameter.linuxAmiOregon.value
-  instance_type               = <span style="color: #51afef;">var</span>.instance-type
+  instance_type               = var.instance-type
   key_name                    = aws_key_pair.worker-key.key_name
-  associate_public_ip_address = <span style="color: #a9a1e1;">true</span>
+  associate_public_ip_address = true
   vpc_security_group_ids      = [aws_security_group.jenkins-sg-oregon.id]
   subnet_id                   = aws_subnet.subnet_1_oregon.id
   tags = {
-    Name = join(<span style="color: #98be65;">"_"</span>, [<span style="color: #98be65;">"jenkins_worker_tf"</span>, count.index + <span style="color: #da8548; font-weight: bold;">1</span>])
+    Name = join("_", ["jenkins_worker_tf", count.index + 1])
   }
-  depends_on = [aws_main_route_table_association.set-worker-<span style="color: #51afef;">default</span>-rt-assoc, aws_instance.jenkins-master]
+  depends_on = [aws_main_route_table_association.set-worker-default-rt-assoc, aws_instance.jenkins-master]
 }
 </pre>
 </div>
@@ -1198,16 +1198,16 @@ resource <span style="color: #98be65;">"aws_instance"</span> <span style="color:
 </div>
 </div>
 </div>
-<div id="outline-container-orgea11e71" class="outline-2">
-<h2 id="orgea11e71"><span class="section-number-2">8</span> Bootstrap EC2 with cloud-init&#xa0;&#xa0;&#xa0;<span class="tag"><span class="cloudinit">cloudinit</span></span></h2>
+<div id="outline-container-org066d131" class="outline-2">
+<h2 id="org066d131"><span class="section-number-2">8</span> Bootstrap EC2 with cloud-init&#xa0;&#xa0;&#xa0;<span class="tag"><span class="cloudinit">cloudinit</span></span></h2>
 <div class="outline-text-2" id="text-8">
 <ul class="org-ul">
 <li><a href="https://cloudinit.readthedocs.io/en/latest/">https://cloudinit.readthedocs.io/en/latest/</a></li>
 <li><a href="https://cloudinit.readthedocs.io/en/latest/topics/examples.html">https://cloudinit.readthedocs.io/en/latest/topics/examples.html</a></li>
 </ul>
 </div>
-<div id="outline-container-org329b6bb" class="outline-3">
-<h3 id="org329b6bb"><span class="section-number-3">8.1</span> <a href="./terraform/scripts/cloud-init.yaml">./terraform/scripts/cloud-init.yaml</a></h3>
+<div id="outline-container-org61a9a93" class="outline-3">
+<h3 id="org61a9a93"><span class="section-number-3">8.1</span> <a href="./terraform/scripts/cloud-init.yaml">./terraform/scripts/cloud-init.yaml</a></h3>
 <div class="outline-text-3" id="text-8-1">
 <ul class="org-ul">
 <li>install software</li>
@@ -1229,8 +1229,8 @@ runcmd:
 </div>
 </div>
 </div>
-<div id="outline-container-org9e6ce1c" class="outline-2">
-<h2 id="org9e6ce1c"><span class="section-number-2">9</span> Verify project up to this point</h2>
+<div id="outline-container-org9e6d50b" class="outline-2">
+<h2 id="org9e6d50b"><span class="section-number-2">9</span> Verify project up to this point</h2>
 <div class="outline-text-2" id="text-9">
 <div class="org-src-container">
 <pre class="src src-sh">ssh -o <span style="color: #dcaeea;">StrictHostKeyChecking</span>=no ec2-user@$<span style="color: #51afef;">(</span><span style="color: #51afef; font-weight: bold;">terraform</span> output -json | jq  -r <span style="color: #98be65;">'."Jenkins-Main-Node-Public-IP"."value"'</span><span style="color: #51afef;">)</span> <span style="color: #98be65;">"</span><span style="color: #98be65;">sudo</span><span style="color: #98be65;"> </span><span style="color: #98be65;">grep</span><span style="color: #98be65;"> 'testing 1' /var/log/cloud-init-output.log"</span>
@@ -1241,7 +1241,7 @@ runcmd:
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: edward</p>
-<p class="date">Created: 2021-08-25 Wed 12:07</p>
+<p class="date">Created: 2021-08-25 Wed 12:17</p>
 </div>
 </body>
 </html>

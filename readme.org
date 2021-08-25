@@ -107,7 +107,7 @@ terraform {
 :PROPERTIES:
 :header-args: :tangle terraform/providers.tf
 :END:
-#+begin_src js
+#+begin_src json
 provider "aws" {
   #profile = var.profile
   region = var.region-master
@@ -134,7 +134,7 @@ provider "aws" {
 - external ip (yours)
 - workers count (how many instances to create)
 - instance type when deploying EC2
-#+begin_src js
+#+begin_src json
 variable "profile" {
   type    = string
   default = "tf_user"
@@ -185,7 +185,7 @@ variable "instance-type" {
     + enable dns and hostnames
     + tag as ~worker-vpc-jenkins~
 + Variables come from: [[*Create variables][Create variables]]
-#+begin_src js
+#+begin_src json
 #Create VPC in us-east-1
 resource "aws_vpc" "vpc_master" {
   provider             = aws.region-master
@@ -215,7 +215,7 @@ resource "aws_vpc" "vpc_master_oregon" {
 :header-args: :tangle terraform/network.tf
 :END:
 + create an internet gateway in each VPC, which reside in different availability zones (us-east-1 and us-west-2)
-#+begin_src js
+#+begin_src json
 #Create IGW in us-east-1
 resource "aws_internet_gateway" "igw" {
   provider = aws.region-master
@@ -235,7 +235,7 @@ resource "aws_internet_gateway" "igw-oregon" {
   :header-args: :tangle terraform/network.tf
   :END:
   + get ~aws_availability_zones~ that are in ~state: available~
-  #+begin_src js
+  #+begin_src json
 #get all available AZs in VPC for master
 data "aws_availability_zones" "azs" {
   provider = aws.region-master
@@ -254,7 +254,7 @@ data "aws_availability_zones" "azs" {
   - ~10.0.2.0/24~
 + one subnet in the worker VPC defined in  [[*Create VPCs][Create VPCs]].
   - ~192.168.1.0/24~
-#+begin_src js
+#+begin_src json
   #create subnet #1 in us-east-1
   resource "aws_subnet" "subnet_1" {
     provider          = aws.region-master
@@ -285,7 +285,7 @@ data "aws_availability_zones" "azs" {
   :END:
 + Create a peering connection request from the master VPC.
 + Create a peering connection acceptor from the worker VPC.
-#+begin_src js
+#+begin_src json
 #Initiate Peering connection request from us-east-1
 resource "aws_vpc_peering_connection" "useast1-uswest2" {
   provider    = aws.region-master
@@ -316,7 +316,7 @@ resource "aws_vpc_peering_connection_accepter" "accept_peering" {
   - to internet via ~aws_internet_gateway.igw.id~
   - to the master VPC Peering Connection created in:  [[*Create Peering between VPCs][Create Peering between VPCs]]
 + replace default route of the worker VPC with the routing table created above
-#+begin_src js
+#+begin_src json
 #Create route table in us-east-1
 resource "aws_route_table" "internet_route" {
   provider = aws.region-master
@@ -388,7 +388,7 @@ resource "aws_main_route_table_association" "set-worker-default-rt-assoc" {
   - allow out anywhere for ephemeral ports.
   - allow ssh from port 22 from our home IP
   - allow in from us-east-1 (master) subnet created in  [[*Create Subnets in our VPCs][Create Subnets in our VPCs]]
-#+begin_src js
+#+begin_src json
 #Create SG for LB, only TCP/80,TCP/443 and outbound access
 resource "aws_security_group" "lb-sg" {
   provider    = aws.region-master
@@ -491,7 +491,7 @@ resource "aws_security_group" "jenkins-sg-oregon" {
   - get the AMI names for the latest Amazon Linux AMI
   - store this as linuxAmi and linuxAmiOregon
   - can later be accessed with: ~data.aws_ssm_parameter.linuxAmi.value~
-#+begin_src js
+#+begin_src json
 #Get Linux AMI ID using SSM Parameter endpoint in us-east-1
 data "aws_ssm_parameter" "linuxAmi" {
   provider = aws.region-master
@@ -510,7 +510,7 @@ data "aws_ssm_parameter" "linuxAmiOregon" {
 :END:
 + data
   - store cloud-init as data to pass to EC2 for boostrapping
-#+begin_src js
+#+begin_src json
 data "template_file" "user_data" {
   template = file("./scripts/cloud-init.yaml")
 }
@@ -523,7 +523,7 @@ data "template_file" "user_data" {
 :header-args: :tangle terraform/instances.tf
 :END:
 + assign keypairs for each region from [[./terraform/ssh/id_rsa.pub]]
-#+begin_src js
+#+begin_src json
 #Create key-pair for logging into EC2 in us-east-1
 resource "aws_key_pair" "master-key" {
   provider = aws.region-master
@@ -544,7 +544,7 @@ resource "aws_key_pair" "worker-key" {
 :PROPERTIES:
 :header-args: :tangle terraform/instances.tf
 :END:
-#+begin_src js
+#+begin_src json
 #Create and bootstrap EC2 in us-east-1
 resource "aws_instance" "jenkins-master" {
   provider                    = aws.region-master
