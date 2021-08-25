@@ -1,10 +1,38 @@
 #+TITLE: Deploying a Web App with AWS, Terraform, Cloud-init, Ansible and Jenkins
+#+SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
 #+OPTIONS: toc:2          (only include two levels in TOC)
-
+* The project
+Project is to use this repository ( and possibly a couple others ) to build and deploy a web application using some core technologies:
+- AWS for cloud housting
+- Terraform to provision AWS
+- Cloud-init for any VMs
+- Ansible for config management
+- Jenkins to deploy the application
+- An application /(TBD)/
+** This Document
+Documentation and code are built into this same [[https://orgmode.org/][orgmode]] document. All the code in this repository is created from snippets in this document via org-tangle. The process is as follows:
+1. Create a new bullet point/update old one
+2. Add ~PROPERTIES~ under the bullet to specify file to either ammend or create
+3. Run ~org-bable-tangle~ (within Emacs). This extracts all code blocks and builds code files
+4. /optional/ Apply any necessary formatting, ex: ~terraform fmt~
+5. Check in and push changes. This document and corresponding repositories *should* be VCS driven, with changes applied after successful Git commit/push.
+The purpose of this is to build a cloud based project using IaC that explains *why* each step is done, as well as *how*, all in one place.
 * Conventions
+** syntax
 | type         | example      |
 |--------------+--------------|
 | ~custom input~ | ~<your_input>~ |
+** Code Example
+- Each block will be named as above
+- Following will be bullet points with an explanation and /hopefully/ a link to the corresponding resource
+*** [[./example_code.py]] <-- the file that will be "tangled", see [[*This Document][This Document]]
+:PROPERTIES:
+:header-args: :tangle example_code.py
+:END:
+- This prints "hello world" to the user on execution
+  #+begin_src python
+print ("hello world")
+  #+end_src
 * Install Terraform :terraform:install:
 https://www.terraform.io/downloads.html
 * Install Packer -- (Unused in this project, at this time) :packer:install:
@@ -56,7 +84,7 @@ sudo apt-get update && sudo apt-get install packer
   }
   #+end_src
 - Add access keys to Terraform Cloud
-  - https://app.terraform.io/app/<organization>/workspaces/<workspace>/variables
+ - https://app.terraform.io/app/<organization>/workspaces/<workspace>/variables
 - Initialize your environment ~terraform init~
 - Configure Terraform Cloud to plan and apply upon check-in
   + https://app.terraform.io/app/<your_org>/workspaces/<your_workspace>/settings/general
@@ -64,33 +92,30 @@ sudo apt-get update && sudo apt-get install packer
 ** Create variables :variables:
 - Input variables serve as parameters for a Terraform module, allowing aspects of the module to be customized without altering the module's own source code, and allowing modules to be shared between different configurations.
   + https://www.terraform.io/docs/language/values/variables.html
-- profile and default user
-- two regions
-  - a master region
-  - a worker region
-- external_ip (yours)
-- workers_count (how many instances to create)
-- instance type
 *** [[./variables.tf]]
 :PROPERTIES:
 :header-args: :tangle variables.tf
 :END:
+- profile and default user
+- two regions
+  - a master region
+  - a worker region
+- external ip (yours)
+- workers count (how many instances to create)
+- instance type when deploying EC2
 #+begin_src js
 variable "profile" {
   type    = string
   default = "tf_user"
 }
-
 variable "region-master" {
   type    = string
   default = "us-east-1"
 }
-
 variable "region-worker" {
   type    = string
   default = "us-west-2"
 }
-
 variable "test" {
   type    = string
   default = "catheadbiscuit"
@@ -109,70 +134,319 @@ variable "instance-type" {
   default = "t3.micro"
 }
 #+end_src
-
 ** Create a network :network:
 *** Create VPCs :vpc:
 - A virtual network dedicated to your AWS account.
   + https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html
-- [[./network.tf]]
-  + VPCs
-    - vpc_master
-    - vpc_master_oregon
+**** [[./network.tf]]
+:PROPERTIES:
+:header-args: :tangle network.tf
+:END:
++ VPCs
+  - *vpc_master*
+    + deploy in us-east-1
+    + give network 10.0.0.0/16
+    + enable dns and hostnames
+    + tag this as ~master-vpc-jenkins~
+  - *vpc_master_oregon*
+    + deploy in us-west-2
+    + give network 192.168.0.0/16
+    + enable dns and hostnames
+    + tag as ~worker-vpc-jenkins~
++ Variables come from: [[*Create variables][Create variables]]
+#+begin_src js
+#Create VPC in us-east-1
+resource "aws_vpc" "vpc_master" {
+  provider             = aws.region-master
+  cidr_block           = "10.0.0.0/16"
+  enable_dns_support   = true
+  enable_dns_hostnames = true
+  tags = {
+    Name = "master-vpc-jenkins"
+  }
+}
+#Create VPC in us-west-2
+resource "aws_vpc" "vpc_master_oregon" {
+  provider             = aws.region-worker
+  cidr_block           = "192.168.0.0/16"
+  enable_dns_support   = true
+  enable_dns_hostnames = true
+  tags = {
+    Name = "worker-vpc-jenkins"
+  }
+}
+  #+end_src
 *** Create IGWs :igw:
 - An internet gateway is a horizontally scaled, redundant, and highly available VPC component that allows communication between your VPC and the internet.
   + https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
-- [[./network.tf]]
-  + create an internet gateway in each VPC, which reside in different availability zones (us-east-1 and us-west-2)
+**** [[./network.tf]]
+:PROPERTIES:
+  :header-args: :tangle network.tf
+  :END:
++ create an internet gateway in each VPC, which reside in different availability zones (us-east-1 and us-west-2)
+#+begin_src js
+#Create IGW in us-east-1
+resource "aws_internet_gateway" "igw" {
+  provider = aws.region-master
+  vpc_id   = aws_vpc.vpc_master.id
+}
+#Create IGW in us-west-2
+resource "aws_internet_gateway" "igw-oregon" {
+  provider = aws.region-worker
+  vpc_id   = aws_vpc.vpc_master_oregon.id
+}
+#+end_src
 *** Provide Data :data:
 - Data sources allow Terraform use information defined outside of Terraform, defined by another separate Terraform configuration, or modified by functions.
   + https://www.terraform.io/docs/language/data-sources/index.html
-- [[./network.tf]]
+**** [[./network.tf]]
+  :PROPERTIES:
+  :header-args: :tangle network.tf
+  :END:
   + get ~aws_availability_zones~ that are in ~state: available~
+  #+begin_src js
+#get all available AZs in VPC for master
+data "aws_availability_zones" "azs" {
+  provider = aws.region-master
+  state    = "available"
+  #+end_src
 *** Create Subnets in our VPCs :subnet:
 - When you create a VPC, you must specify a range of IPv4 addresses for the VPC in the form of a Classless Inter-Domain Routing (CIDR) block; for example, 10.0.0.0/16. This is the primary CIDR block for your VPC. For more information about CIDR notation, see RFC 4632.
   + https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Subnets.html
-- [[./network.tf]]
-  + two subnets in the master VPC defined in [[*Create VPCs][Create VPCs]].
-    - ~10.0.1.0/24~
-    - ~10.0.2.0/24~
-  + one subnet in the worker VPC defined in  [[*Create VPCs][Create VPCs]].
-    - ~192.168.1.0/24~
+**** [[./network.tf]]
+:PROPERTIES:
+  :header-args: :tangle network.tf
+  :END:
++ two subnets in the master VPC defined in [[*Create VPCs][Create VPCs]].
+  - ~10.0.1.0/24~
+  - ~10.0.2.0/24~
++ one subnet in the worker VPC defined in  [[*Create VPCs][Create VPCs]].
+  - ~192.168.1.0/24~
+#+begin_src js
+  #create subnet #1 in us-east-1
+  resource "aws_subnet" "subnet_1" {
+    provider          = aws.region-master
+    availability_zone = element(data.aws_availability_zones.azs.names, 0)
+    vpc_id            = aws_vpc.vpc_master.id
+    cidr_block        = "10.0.1.0/24"
+  }
+  #create subnet #2 in us-east-1
+  resource "aws_subnet" "subnet_2" {
+    provider          = aws.region-master
+    availability_zone = element(data.aws_availability_zones.azs.names, 1)
+    vpc_id            = aws_vpc.vpc_master.id
+    cidr_block        = "10.0.2.0/24"
+  }
+  #create subnet #1 in us-west-2
+  resource "aws_subnet" "subnet_1_oregon" {
+    provider   = aws.region-worker
+    vpc_id     = aws_vpc.vpc_master_oregon.id
+    cidr_block = "192.168.1.0/24"
+  }
+#+end_src
 *** Create Peering between VPCs :peering:
 - A VPC peering connection is a networking connection between two VPCs that enables you to route traffic between them using private IPv4 addresses or IPv6 addresses.
   + https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html
-- [[./network.tf]]
-  + Create a peering connection request from the master VPC.
-  + Create a peering connection acceptor from the worker VPC.
+**** [[./network.tf]]
+:PROPERTIES:
+  :header-args: :tangle network.tf
+  :END:
++ Create a peering connection request from the master VPC.
++ Create a peering connection acceptor from the worker VPC.
+#+begin_src js
+#Initiate Peering connection request from us-east-1
+resource "aws_vpc_peering_connection" "useast1-uswest2" {
+  provider    = aws.region-master
+  peer_vpc_id = aws_vpc.vpc_master_oregon.id
+  vpc_id      = aws_vpc.vpc_master.id
+  peer_region = var.region-worker
+
+}
+#Accept VPC peering request in us-west-2 from us-east-1
+resource "aws_vpc_peering_connection_accepter" "accept_peering" {
+  provider                  = aws.region-worker
+  vpc_peering_connection_id = aws_vpc_peering_connection.useast1-uswest2.id
+  auto_accept               = true
+}
+#+end_src
 *** Create Routing in and between VPCs :route:vpc:
 - A route table contains a set of rules, called routes, that are used to determine where network traffic from your subnet or gateway is directed.
   + https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html
-- [[./network.tf]]
-  + create a routing table for the master VPC
-    - to internet via ~aws_internet_gateway.igw.id~
-    - to the worker VPC Peering Connection created in:  [[*Create Peering between VPCs][Create Peering between VPCs]]
-  + replace default route of the master VPC with the routing table created above
-  + create routing table for worker VPC
-    - to internet via ~aws_internet_gateway.igw.id~
-    - to the master VPC Peering Connection created in:  [[*Create Peering between VPCs][Create Peering between VPCs]]
-  + replace default route of the worker VPC with the routing table created above
+**** [[./network.tf]]
+:PROPERTIES:
+  :header-args: :tangle network.tf
+  :END:
++ create a routing table for the master VPC
+  - to internet via ~aws_internet_gateway.igw.id~
+  - to the worker VPC Peering Connection created in:  [[*Create Peering between VPCs][Create Peering between VPCs]]
++ replace default route of the master VPC with the routing table created above
++ create routing table for worker VPC
+  - to internet via ~aws_internet_gateway.igw.id~
+  - to the master VPC Peering Connection created in:  [[*Create Peering between VPCs][Create Peering between VPCs]]
++ replace default route of the worker VPC with the routing table created above
+#+begin_src js
+#Create route table in us-east-1
+resource "aws_route_table" "internet_route" {
+  provider = aws.region-master
+  vpc_id   = aws_vpc.vpc_master.id
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw.id
+  }
+  route {
+    cidr_block                = "192.168.1.0/24"
+    vpc_peering_connection_id = aws_vpc_peering_connection.useast1-uswest2.id
+  }
+  lifecycle {
+    ignore_changes = all
+  }
+  tags = {
+    Name = "Master-Region-RT"
+  }
+}
+#Overwrite default route table of VPC(Master) with our route table entries
+resource "aws_main_route_table_association" "set-master-default-rt-assoc" {
+  provider       = aws.region-master
+  vpc_id         = aws_vpc.vpc_master.id
+  route_table_id = aws_route_table.internet_route.id
+}
+#Create route table in us-west-2
+resource "aws_route_table" "internet_route_oregon" {
+  provider = aws.region-worker
+  vpc_id   = aws_vpc.vpc_master_oregon.id
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw-oregon.id
+  }
+  route {
+    cidr_block                = "10.0.1.0/24"
+    vpc_peering_connection_id = aws_vpc_peering_connection.useast1-uswest2.id
+  }
+  lifecycle {
+    ignore_changes = all
+  }
+  tags = {
+    Name = "Worker-Region-RT"
+  }
+}
+#Overwrite default route table of VPC(Worker) with our route table entries
+resource "aws_main_route_table_association" "set-worker-default-rt-assoc" {
+  provider       = aws.region-worker
+  vpc_id         = aws_vpc.vpc_master_oregon.id
+  route_table_id = aws_route_table.internet_route_oregon.id
+}
+#+end_src
 *** Create Security Groups :security_groups:
 - A security group acts as a virtual firewall for your instance to control inbound and outbound traffic.
   + https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html
-- [[./security_groups.tf]]
-  + create a SG for the: [[*Create an ALB][Create an ALB]]
-    - allow in from 80/443 web ports.
-    - allow out anywhere for ephemeral ports.
-  + create a security group for Jenkins in VPC Master
-    - allow in from 80/443 web ports.
-    - allow out anywhere for ephemeral ports.
-    - allow ssh from port 22 from our home IP
-    - allow in from us-west-2 (worker) subnet created in  [[*Create Subnets in our VPCs][Create Subnets in our VPCs]]
-  + create a security group for Jenkins in VPC worker
-    - allow in from 80/443 web ports.
-    - allow out anywhere for ephemeral ports.
-    - allow ssh from port 22 from our home IP
-    - allow in from us-east-1 (master) subnet created in  [[*Create Subnets in our VPCs][Create Subnets in our VPCs]]
-*** Create an ALB :alb:
+**** [[./security_groups.tf]]
+:PROPERTIES:
+:header-args: :tangle security_groups.tf
+:END:
++ create a SG for the: [[*Create an ALB][Create an ALB]]
+  - allow in from 80/443 web ports.
+  - allow out anywhere for ephemeral ports.
++ create a security group for Jenkins in VPC Master
+  - allow in from 80/443 web ports.
+  - allow out anywhere for ephemeral ports.
+  - allow ssh from port 22 from our home IP
+  - allow in from us-west-2 (worker) subnet created in  [[*Create Subnets in our VPCs][Create Subnets in our VPCs]]
++ create a security group for Jenkins in VPC worker
+  - allow in from 80/443 web ports.
+  - allow out anywhere for ephemeral ports.
+  - allow ssh from port 22 from our home IP
+  - allow in from us-east-1 (master) subnet created in  [[*Create Subnets in our VPCs][Create Subnets in our VPCs]]
+#+begin_src js
+#Create SG for LB, only TCP/80,TCP/443 and outbound access
+resource "aws_security_group" "lb-sg" {
+  provider    = aws.region-master
+  name        = "lb-sg"
+  description = "Allow 443 and traffic to Jenkins SG"
+  vpc_id      = aws_vpc.vpc_master.id
+  ingress {
+    description = "Allow 443 from anywhere"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    description = "Allow 80 from anywhere for redirection"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+#Create SG for allowing TCP/8080 from * and TCP/22 from your IP in us-east-1
+resource "aws_security_group" "jenkins-sg" {
+  provider    = aws.region-master
+  name        = "jenkins-sg"
+  description = "Allow TCP/8080 & TCP/22"
+  vpc_id      = aws_vpc.vpc_master.id
+  ingress {
+    description = "Allow 22 from our public IP"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [var.external_ip]
+  }
+  ingress {
+    description     = "allow anyone on port 8080"
+    from_port       = 8080
+    to_port         = 8080
+    protocol        = "tcp"
+    security_groups = [aws_security_group.lb-sg.id]
+  }
+  ingress {
+    description = "allow traffic from us-west-2"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["192.168.1.0/24"]
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+#Create SG for allowing TCP/22 from your IP in us-west-2
+resource "aws_security_group" "jenkins-sg-oregon" {
+  provider = aws.region-worker
+
+  name        = "jenkins-sg-oregon"
+  description = "Allow TCP/8080 & TCP/22"
+  vpc_id      = aws_vpc.vpc_master_oregon.id
+  ingress {
+    description = "Allow 22 from our public IP"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [var.external_ip]
+  }
+  ingress {
+    description = "Allow traffic from us-east-1"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["10.0.1.0/24"]
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+#+end_src
 ** Create Instances
 *** Configure AMIs :ami:vm:
 - An Amazon Machine Image (AMI) provides the information required to launch an instance.

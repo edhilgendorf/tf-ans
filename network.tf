@@ -1,4 +1,3 @@
-########### VPC START ####################
 #Create VPC in us-east-1
 resource "aws_vpc" "vpc_master" {
   provider             = aws.region-master
@@ -16,12 +15,10 @@ resource "aws_vpc" "vpc_master_oregon" {
   enable_dns_support   = true
   enable_dns_hostnames = true
   tags = {
-    Name = "master-vpc-jenkins"
+    Name = "worker-vpc-jenkins"
   }
 }
-########### VPC END ####################
 
-########### IGW START ####################
 #Create IGW in us-east-1
 resource "aws_internet_gateway" "igw" {
   provider = aws.region-master
@@ -32,38 +29,33 @@ resource "aws_internet_gateway" "igw-oregon" {
   provider = aws.region-worker
   vpc_id   = aws_vpc.vpc_master_oregon.id
 }
-########### IGW END ####################
 
 #get all available AZs in VPC for master
 data "aws_availability_zones" "azs" {
   provider = aws.region-master
   state    = "available"
-}
 
-########### SUBNET START ####################
-#create subnet #1 in us-east-1
-resource "aws_subnet" "subnet_1" {
-  provider          = aws.region-master
-  availability_zone = element(data.aws_availability_zones.azs.names, 0)
-  vpc_id            = aws_vpc.vpc_master.id
-  cidr_block        = "10.0.1.0/24"
-}
-#create subnet #2 in us-east-1
-resource "aws_subnet" "subnet_2" {
-  provider          = aws.region-master
-  availability_zone = element(data.aws_availability_zones.azs.names, 1)
-  vpc_id            = aws_vpc.vpc_master.id
-  cidr_block        = "10.0.2.0/24"
-}
-#create subnet #1 in us-west-2
-resource "aws_subnet" "subnet_1_oregon" {
-  provider   = aws.region-worker
-  vpc_id     = aws_vpc.vpc_master_oregon.id
-  cidr_block = "192.168.1.0/24"
-}
-########### SUBNET END ####################
+  #create subnet #1 in us-east-1
+  resource "aws_subnet" "subnet_1" {
+    provider          = aws.region-master
+    availability_zone = element(data.aws_availability_zones.azs.names, 0)
+    vpc_id            = aws_vpc.vpc_master.id
+    cidr_block        = "10.0.1.0/24"
+  }
+  #create subnet #2 in us-east-1
+  resource "aws_subnet" "subnet_2" {
+    provider          = aws.region-master
+    availability_zone = element(data.aws_availability_zones.azs.names, 1)
+    vpc_id            = aws_vpc.vpc_master.id
+    cidr_block        = "10.0.2.0/24"
+  }
+  #create subnet #1 in us-west-2
+  resource "aws_subnet" "subnet_1_oregon" {
+    provider   = aws.region-worker
+    vpc_id     = aws_vpc.vpc_master_oregon.id
+    cidr_block = "192.168.1.0/24"
+  }
 
-########### PEERING START ####################
 #Initiate Peering connection request from us-east-1
 resource "aws_vpc_peering_connection" "useast1-uswest2" {
   provider    = aws.region-master
@@ -78,9 +70,7 @@ resource "aws_vpc_peering_connection_accepter" "accept_peering" {
   vpc_peering_connection_id = aws_vpc_peering_connection.useast1-uswest2.id
   auto_accept               = true
 }
-########### PEERING END ####################
 
-########### ROUTING TABLE START ####################
 #Create route table in us-east-1
 resource "aws_route_table" "internet_route" {
   provider = aws.region-master
@@ -131,4 +121,3 @@ resource "aws_main_route_table_association" "set-worker-default-rt-assoc" {
   vpc_id         = aws_vpc.vpc_master_oregon.id
   route_table_id = aws_route_table.internet_route_oregon.id
 }
-########### ROUTING TABLE END ####################
