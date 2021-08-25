@@ -42,6 +42,7 @@ print ("hello world")
 - Since Terraform runs are repo driven, anytime an update hits it will queue up a run. In order to save money on AWS, and lower the number of runs, create a working directory in Terraform Cloud, then relocate all Terraform code to that directory.
   + https://www.terraform.io/docs/cloud/workspaces/settings.html
 - It is then possible to trigger runs only on working directories
+- This also prevents Terraform kicking off when I am only updating this documentation.
 * Install Terraform :terraform:install:
 https://www.terraform.io/downloads.html
 * Install Packer -- (Unused in this project, at this time) :packer:install:
@@ -510,7 +511,6 @@ data "aws_ssm_parameter" "linuxAmiOregon" {
 + data
   - store cloud-init as data to pass to EC2 for boostrapping
 #+begin_src js
-#test
 data "template_file" "user_data" {
   template = file("./scripts/cloud-init.yaml")
 }
