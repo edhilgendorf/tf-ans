@@ -9,5 +9,5 @@ runcmd:
   - aws --version
   - echo "cathead-biscuit"
   - yum update -y
-  - amazon-linux-estras install ansible2
+  - amazon-linux-extras install ansible2
   - ansible --version
