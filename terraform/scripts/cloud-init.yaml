@@ -4,6 +4,8 @@ package_upgrade: true
 packages:
   - awscli
   - tmux
+  - ansible
 runcmd:
   - aws --version
   - echo "cathead-biscuit"
+  - ansible --version
