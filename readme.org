@@ -598,6 +598,10 @@ runcmd:
   - echo "cathead-biscuit"
 #+end_src
 * Verify project up to this point
-#+begin_src sh
+* Useful Commands
+- taint :: taint a resource to be replaced. This might be useful to retest a cloud-init script without recreating all of your infrastructure.
+  + ex: ~terraform taint aws_instance.jenkins-master~
+- ssh to an instance
+  #+begin_src sh
 ssh -o StrictHostKeyChecking=no ec2-user@$(terraform output -json | jq  -r '."Jenkins-Main-Node-Public-IP"."value"') "sudo grep 'cathead' /var/log/cloud-init-output.log"
-#+end_src
+  #+end_src
