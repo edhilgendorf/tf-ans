@@ -597,7 +597,6 @@ runcmd:
   - aws --version
   - echo "cathead-biscuit"
 #+end_src
-* Verify project up to this point
 * Useful Commands
 - taint :: taint a resource to be replaced. This might be useful to retest a cloud-init script without recreating all of your infrastructure.
   + ex: ~terraform taint aws_instance.jenkins-master~
