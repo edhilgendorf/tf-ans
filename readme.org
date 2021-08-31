@@ -19,7 +19,8 @@ Documentation and code are built into this same [[https://orgmode.org/][orgmode]
 5. Check in and push changes. This document and corresponding repositories *should* be VCS driven, with changes applied after successful Git commit/push.
 The purpose of this is to build a cloud based project using IaC that explains *why* each step is done, as well as *how*, all in one place. See this document in plain text, here: [[https://raw.githubusercontent.com/edhilgendorf/tf-ans/main/readme.org][readme.org]]
 ** Links
-- [[https://github.com/edhilgendorf/tf-ans][Project GitHub]]
+- [[https://github.com/edhilgendorf/tf-ans][Terraform Project Repository]]
+- [[https://github.com/edhilgendorf/ansible-cloud][Ansible Project Repository]]
 - [[https://edhilgendorf.github.io/tf-ans/][Read the docs]]
 - [[https://hilgendorf.me][hilgendorf.me]]
 * Conventions
@@ -43,6 +44,20 @@ print ("hello world")
   + https://www.terraform.io/docs/cloud/workspaces/settings.html
 - It is then possible to trigger runs only on working directories
 - This also prevents Terraform kicking off when I am only updating this documentation.
+- Real file structure will look like this:
+  #+begin_src
+.
+├── ansible-cloud
+│   ├── ansible.cfg
+│   ├── inventory
+│   └── README.md
+└── terraform-cloud
+    ├── example_code.py
+    ├── index.html
+    ├── readme.org
+    └── terraform
+  #+end_src
+  + This structure is rigid as I may want to experiment getting outputs from Terraform into Ansible. But I don't think this is best practice (to be done locally) as Git checkouts/clones can vary by user. I think one solution is a Git submodule, or just using terraform ~local-exec~ to clone in place, but as mentioned in [[https://www.terraform.io/docs/language/resources/provisioners/local-exec.html][local-exec provisioner documentation]] it is a last resort.
 * Install Terraform :terraform:install:
 https://www.terraform.io/downloads.html
 * Install Packer -- (Unused in this project, at this time) :packer:install:
@@ -134,6 +149,7 @@ provider "aws" {
 - external ip (yours)
 - workers count (how many instances to create)
 - instance type when deploying EC2
+- a URL for our Ansible repo so we can clone it
 #+begin_src json
 variable "profile" {
   type    = string
@@ -163,6 +179,10 @@ variable "workers-count" {
 variable "instance-type" {
   type    = string
   default = "t3.micro"
+}
+variable "ansible-git" {
+  type    = string
+  default = "https://github.com/edhilgendorf/ansible-cloud.git"
 }
 #+end_src
 ** Create a network :network:
@@ -517,7 +537,7 @@ data "template_file" "user_data" {
 #+end_src
 *** Configure SSH keypairs for AMI VMs :keypair:
 - A key pair, consisting of a public key and a private key, is a set of security credentials that you use to prove your identity when connecting to an Amazon EC2 instance. Amazon EC2 stores the public key on your instance, and you store the private key. For Linux instances, the private key allows you to securely SSH into your instance. Anyone who possesses your private key can connect to your instances, so it's important that you store your private key in a secure place.
-  + https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html
+  + [[https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html][EC2 Keypairs]]
 **** [[./terraform/instances.tf]]
 :PROPERTIES:
 :header-args: :tangle terraform/instances.tf
@@ -539,7 +559,7 @@ resource "aws_key_pair" "worker-key" {
 #+end_src
 *** Create EC2 Instances :ec2:
 - Amazon Elastic Compute Cloud (Amazon EC2) is a web service that provides secure, resizable compute capacity in the cloud. It is designed to make web-scale cloud computing easier for developers.
-  + https://aws.amazon.com/ec2/?ec2-whats-new.sort-by=item.additionalFields.postDateTime&ec2-whats-new.sort-order=desc
+  + [[https://aws.amazon.com/ec2/?ec2-whats-new.sort-by=item.additionalFields.postDateTime&ec2-whats-new.sort-order=desc][AWS EC2]]
 **** [[./terraform/instances.tf]]
 :PROPERTIES:
 :header-args: :tangle terraform/instances.tf
@@ -593,10 +613,30 @@ package_upgrade: true
 packages:
   - awscli
   - tmux
+  - ansible
+  - git
 runcmd:
   - aws --version
   - echo "cathead-biscuit"
+  - yum update -y
+  - amazon-linux-extras install ansible2
+  - ansible --version
+  - git clone https://github.com/edhilgendorf/ansible-cloud.git
 #+end_src
+* Configuration Management with Ansible :ansible:
+- This will be focused on a new repository: [[https://github.com/edhilgendorf/ansible-cloud.git][ansible-cloud]]
+- From here we will provision all agent EC2 instances created in [[*Create Infrastructure with Terraform][Create Infrastructure with Terraform]] with Ansible, starting with Jenkins
+** Getting AWS Credentials to Ansible
+- Local AWS access via [[https://aws.amazon.com/cli/][AWS CLI]] must be configured prior to this point, so we are going to leverage those credentials to get them into place on the EC2 server so we are able to build and maintain our [[*Dynamic Inventory][Dynamic Inventory]].
+- To do this we will need to run a local script, *after* Terraform provisioning is complete.
+*** [[./sync-aws-creds.sh]]
+:PROPERTIES:
+:header-args: :tangle ./sync-aws-creds.sh
+:END:
+#+begin_src json
+rsync -vaP ~/.aws/credentials ec2-user@$(terraform output -json | jq  -r '."Jenkins-Main-Node-Public-IP"."value"')/tmp/credentials
+#+end_src
+** Dynamic Inventory
 * Useful Commands
 - ~taint~: taint a resource to be replaced. This might be useful to retest a cloud-init script without recreating all of your infrastructure.
   + ex: ~terraform taint aws_instance.jenkins-master~

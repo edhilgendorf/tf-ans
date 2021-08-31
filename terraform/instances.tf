@@ -25,7 +25,7 @@ resource "aws_key_pair" "worker-key" {
   key_name = "jenkins"
   public_key = file("ssh/id_rsa.pub")
 }
-#
+
 #Create and bootstrap EC2 in us-east-1
 resource "aws_instance" "jenkins-master" {
   provider                    = aws.region-master

@@ -5,9 +5,11 @@ packages:
   - awscli
   - tmux
   - ansible
+  - git
 runcmd:
   - aws --version
   - echo "cathead-biscuit"
   - yum update -y
   - amazon-linux-extras install ansible2
   - ansible --version
+  - git clone https://github.com/edhilgendorf/ansible-cloud.git

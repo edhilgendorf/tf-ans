@@ -27,3 +27,7 @@ variable "instance-type" {
   type    = string
   default = "t3.micro"
 }
+variable "ansible-git" {
+  type    = string
+  default = "https://github.com/edhilgendorf/ansible-cloud.git"
+}
