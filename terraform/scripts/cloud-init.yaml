@@ -6,6 +6,8 @@ packages:
   - tmux
   - ansible
   - git
+  - python3
+  - python3-pip
 runcmd:
   - aws --version
   - echo "cathead-biscuit"
@@ -13,3 +15,5 @@ runcmd:
   - amazon-linux-extras install ansible2
   - ansible --version
   - git clone https://github.com/edhilgendorf/ansible-cloud.git
+  - pip3 install boto3
+  - sudo mkdir -p /opt/ansible/inventory

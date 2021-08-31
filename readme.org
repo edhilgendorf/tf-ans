@@ -599,7 +599,7 @@ resource "aws_instance" "jenkins-worker-oregon" {
 * Bootstrap EC2 with cloud-init :cloudinit:
 - https://cloudinit.readthedocs.io/en/latest/
 - https://cloudinit.readthedocs.io/en/latest/topics/examples.html
-** [[./terraform/scripts/cloud-init.yaml]]
+** [[./terraform/scripts/cloud-init.yaml]] :cloudinit:script:
 :PROPERTIES:
 :header-args: :tangle terraform/scripts/cloud-init.yaml
 :END:
@@ -615,6 +615,8 @@ packages:
   - tmux
   - ansible
   - git
+  - python3
+  - python3-pip
 runcmd:
   - aws --version
   - echo "cathead-biscuit"
@@ -622,6 +624,8 @@ runcmd:
   - amazon-linux-extras install ansible2
   - ansible --version
   - git clone https://github.com/edhilgendorf/ansible-cloud.git
+  - pip3 install boto3
+  - sudo mkdir -p /opt/ansible/inventory
 #+end_src
 * Configuration Management with Ansible :ansible:
 - This will be focused on a new repository: [[https://github.com/edhilgendorf/ansible-cloud.git][ansible-cloud]]
@@ -634,7 +638,7 @@ runcmd:
 :header-args: :tangle ./terraform/sync-aws-creds.sh
 :END:
 #+begin_src json
-rsync -vaP ~/.aws/credentials ec2-user@$(terraform output -json | jq  -r '."Jenkins-Main-Node-Public-IP"."value"')/tmp/credentials
+rsync -vaP ~/.aws/credentials ec2-user@$(terraform output -json | jq  -r '."Jenkins-Main-Node-Public-IP"."value"'):/tmp/credentials
 #+end_src
 ** Dynamic Inventory
 * Useful Commands
