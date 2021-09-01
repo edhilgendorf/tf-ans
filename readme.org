@@ -150,6 +150,7 @@ provider "aws" {
 - workers count (how many instances to create)
 - instance type when deploying EC2
 - a URL for our Ansible repo so we can clone it
+- set IAM policy for EC2 Full access, this will be used for Ansible [[*Dynamic Inventory][Dynamic Inventory]]
 #+begin_src json
 variable "profile" {
   type    = string
@@ -183,6 +184,11 @@ variable "instance-type" {
 variable "ansible-git" {
   type    = string
   default = "https://github.com/edhilgendorf/ansible-cloud.git"
+}
+variable "iam_policy_ec2_full_arn" {
+  description = "IAM Policy for full EC2"
+  type = "string"
+  default = "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
 }
 #+end_src
 ** Create a network :network:
@@ -557,6 +563,17 @@ resource "aws_key_pair" "worker-key" {
   public_key = file("ssh/id_rsa.pub")
 }
 #+end_src
+*** Create IAM Role for EC2 Access :ec2:iam:
+**** [[./terraform/instances.tf]]
+:PROPERTIES:
+:header-args: :tangle terraform/instances.tf
+:END:
+#+begin_src json
+resource "aws_iam_role" "ec2_full_access" {
+name = "ec2_access"
+managed_policy_arns = var.iam_policy_ec2_full_arn
+}
+#+end_src
 *** Create EC2 Instances :ec2:
 - Amazon Elastic Compute Cloud (Amazon EC2) is a web service that provides secure, resizable compute capacity in the cloud. It is designed to make web-scale cloud computing easier for developers.
   + [[https://aws.amazon.com/ec2/?ec2-whats-new.sort-by=item.additionalFields.postDateTime&ec2-whats-new.sort-order=desc][AWS EC2]]
@@ -606,6 +623,9 @@ resource "aws_instance" "jenkins-worker-oregon" {
 + install software
 + create users
 + jenkins-master will also be ansible master
++ create ssh key
++ copy it to ec2-user known keys
++
 #+begin_src yaml
 #cloud-config
 package_update: true
@@ -617,6 +637,7 @@ packages:
   - git
   - python3
   - python3-pip
+  - python-boto3
 runcmd:
   - aws --version
   - echo "cathead-biscuit"
@@ -641,6 +662,20 @@ runcmd:
 rsync -vaP ~/.aws/credentials ec2-user@$(terraform output -json | jq  -r '."Jenkins-Main-Node-Public-IP"."value"'):/tmp/credentials
 #+end_src
 ** Dynamic Inventory
+https://aws.amazon.com/blogs/apn/getting-started-with-ansible-and-dynamic-amazon-ec2-inventory-management/
+*** [[../ansible-cloud/test.yaml]]
+:PROPERTIES:
+:header-args: :tangle ../ansible-cloud/test.yaml
+:END:
+#+begin_src yml
+---
+# variables from dynamic inventory
+- name: variables from dynamic inventory
+  hosts: localhost
+  remote_user: ec2-user
+  collections:
+  - amazon.aws.aws_ec2
+#+end_src
 * Useful Commands
 - ~taint~: taint a resource to be replaced. This might be useful to retest a cloud-init script without recreating all of your infrastructure.
   + ex: ~terraform taint aws_instance.jenkins-master~
