@@ -671,7 +671,8 @@ provider                    = aws.region-master
   "Statement": [
     {
       "Action": [
-        "s3:*"
+        "s3:*",
+        "ec2:*"
       ],
       "Effect": "Allow",
       "Resource": "*"
@@ -817,7 +818,7 @@ runcmd:
 * Configuration Management with Ansible :ansible:
 - This will be focused on a new repository: [[https://github.com/edhilgendorf/ansible-cloud.git][ansible-cloud]]
 - From here we will provision all agent EC2 instances created in [[*Create Infrastructure with Terraform][Create Infrastructure with Terraform]] with Ansible, starting with Jenkins
-** Getting AWS Credentials to Ansible
+** +Getting AWS Credentials to Ansible+ This is best configured by attaching a role to the EC2 instance, done here: [[*Create IAM Role for EC2 Access][Create IAM Role for EC2 Access]]
 - Local AWS access via [[https://aws.amazon.com/cli/][AWS CLI]] must be configured prior to this point, so we are going to leverage those credentials to get them into place on the EC2 server so we are able to build and maintain our [[*Dynamic Inventory][Dynamic Inventory]].
 - To do this we will need to run a local script, *after* Terraform provisioning is complete.
 *** [[./terraform/sync-aws-creds.sh]]
@@ -827,11 +828,11 @@ runcmd:
 #+begin_src json
 rsync -vaP ~/.aws/credentials ec2-user@$(terraform output -json | jq  -r '."Jenkins-Main-Node-Public-IP"."value"'):/tmp/credentials
 #+end_src
-** Dynamic Inventory
+** Dynamic Inventory :dynamic_inventory:
 https://aws.amazon.com/blogs/apn/getting-started-with-ansible-and-dynamic-amazon-ec2-inventory-management/
-*** [[../ansible-cloud/test.yaml]]
+*** [[../ansible-cloud/ansible-inventory.yml]]
 :PROPERTIES:
-:header-args: :tangle ../ansible-cloud/test.yaml
+:header-args: :tangle ../ansible-cloud/ansible-inventory.yaml
 :END:
 #+begin_src yml
 ---
@@ -841,6 +842,16 @@ https://aws.amazon.com/blogs/apn/getting-started-with-ansible-and-dynamic-amazon
   remote_user: ec2-user
   collections:
   - amazon.aws.aws_ec2
+#+end_src
+*** [[../ansible-cloud/ansible.cfg]]
+:PROPERTIES:
+:header-args: :tangle ../ansible-cloud/ansible.cfg
+:END:
+#+begin_src
+[inventory]
+enable_plugins = aws_ec2
+[defaults]
+inventory = /ansible-cloud/ansible-inventory.yml
 #+end_src
 * Useful Commands
 - ~taint~: taint a resource to be replaced. This might be useful to retest a cloud-init script without recreating all of your infrastructure.

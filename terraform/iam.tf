@@ -38,7 +38,8 @@ provider                    = aws.region-master
   "Statement": [
     {
       "Action": [
-        "s3:*"
+        "s3:*",
+        "ec2:*"
       ],
       "Effect": "Allow",
       "Resource": "*"
