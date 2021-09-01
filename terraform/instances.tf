@@ -26,52 +26,6 @@ resource "aws_key_pair" "worker-key" {
   public_key = file("ssh/id_rsa.pub")
 }
 
-#resource "aws_iam_role" "ec2_full_access" {
-#name = "ec2_access"
-#assume_role_policy = jsonencode({
-##    Version = "2012-10-17"
-#    Statement = [
-#      {
-#        Action = "sts:AssumeRole"
-#        Effect = "Allow"
-#        Sid    = ""
-#        Principal = {
-#          Service = "ec2.amazonaws.com"
-#        }
-#      },
-#    ]
-#})
-#managed_policy_arns = ["arn:aws:iam::aws:policy/AmazonEC2FullAccess"]
-#}
-resource "aws_iam_role" "test_role" {
-  name = "test_role"
-
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "Service": "ec2.amazonaws.com"
-      },
-      "Effect": "Allow",
-      "Sid": ""
-    }
-  ]
-}
-EOF
-
-  tags = {
-      tag-key = "tag-value"
-  }
-}
-
-resource "aws_iam_instance_profile" "test_profile" {
-  name = "test_profile"
-  role = "${aws_iam_role.test_role.name}"
-}
-
 #Create and bootstrap EC2 in us-east-1
 resource "aws_instance" "jenkins-master" {
   provider                    = aws.region-master
@@ -82,6 +36,7 @@ resource "aws_instance" "jenkins-master" {
   vpc_security_group_ids      = [aws_security_group.jenkins-sg.id]
   subnet_id                   = aws_subnet.subnet_1.id
   user_data                   = data.template_file.user_data.rendered
+  iam_instance_profile = "${aws_iam_instance_profile.test_profile.name}"
   tags = {
     Name = "jenkins_master_tf"
   }
