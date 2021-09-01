@@ -200,7 +200,7 @@ sudo apt-get update && sudo apt-get install packer
   ]
 }
 #+end_src
-* Configure Terraform Cloud
+* Configure Terraform Cloud :cloud:terraform_cloud:
 - Regsiter account: https://app.terraform.io/signup/account?utm_source=terraform_io&utm_content=terraform_cloud_top_nav
 - Create an organization
 - Create a Workspace from VCS Repository, ex: https://github.com
@@ -780,7 +780,7 @@ resource "aws_instance" "jenkins-worker-oregon" {
   depends_on = [aws_main_route_table_association.set-worker-default-rt-assoc, aws_instance.jenkins-master]
 }
 #+end_src
-* Bootstrap EC2 with cloud-init :cloudinit:
+* Bootstrap EC2 with cloud-init :cloud_init:
 - https://cloudinit.readthedocs.io/en/latest/
 - https://cloudinit.readthedocs.io/en/latest/topics/examples.html
 ** [[./terraform/scripts/cloud-init.yaml]] :cloudinit:script:
