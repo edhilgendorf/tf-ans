@@ -569,23 +569,23 @@ resource "aws_key_pair" "worker-key" {
 :header-args: :tangle terraform/instances.tf
 :END:
 #+begin_src json
-resource "aws_iam_role" "ec2_full_access" {
-name = "ec2_access"
-assume_role_policy = jsonencode({
-#    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Sid    = ""
-        Principal = {
-          Service = "ec2.amazonaws.com"
-        }
-      },
-    ]
-})
-managed_policy_arns = ["arn:aws:iam::aws:policy/AmazonEC2FullAccess"]
-}
+#resource "aws_iam_role" "ec2_full_access" {
+#name = "ec2_access"
+#assume_role_policy = jsonencode({
+##    Version = "2012-10-17"
+#    Statement = [
+#      {
+#        Action = "sts:AssumeRole"
+#        Effect = "Allow"
+#        Sid    = ""
+#        Principal = {
+#          Service = "ec2.amazonaws.com"
+#        }
+#      },
+#    ]
+#})
+#managed_policy_arns = ["arn:aws:iam::aws:policy/AmazonEC2FullAccess"]
+#}
 #+end_src
 *** Create EC2 Instances :ec2:
 - Amazon Elastic Compute Cloud (Amazon EC2) is a web service that provides secure, resizable compute capacity in the cloud. It is designed to make web-scale cloud computing easier for developers.

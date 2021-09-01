@@ -26,23 +26,23 @@ resource "aws_key_pair" "worker-key" {
   public_key = file("ssh/id_rsa.pub")
 }
 
-resource "aws_iam_role" "ec2_full_access" {
-name = "ec2_access"
-assume_role_policy = jsonencode({
-#    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Sid    = ""
-        Principal = {
-          Service = "ec2.amazonaws.com"
-        }
-      },
-    ]
-})
-managed_policy_arns = ["arn:aws:iam::aws:policy/AmazonEC2FullAccess"]
-}
+#resource "aws_iam_role" "ec2_full_access" {
+#name = "ec2_access"
+#assume_role_policy = jsonencode({
+##    Version = "2012-10-17"
+#    Statement = [
+#      {
+#        Action = "sts:AssumeRole"
+#        Effect = "Allow"
+#        Sid    = ""
+#        Principal = {
+#          Service = "ec2.amazonaws.com"
+#        }
+#      },
+#    ]
+#})
+#managed_policy_arns = ["arn:aws:iam::aws:policy/AmazonEC2FullAccess"]
+#}
 
 #Create and bootstrap EC2 in us-east-1
 resource "aws_instance" "jenkins-master" {
