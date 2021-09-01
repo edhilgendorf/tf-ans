@@ -97,6 +97,7 @@
         "s3:GetObject",
         "s3:HeadBucket",
         "s3:ListBucket",
+        "iam:*"
         "s3:PutObject"
       ],
       "Effect": "Allow",
