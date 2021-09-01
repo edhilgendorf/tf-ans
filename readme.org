@@ -144,8 +144,8 @@ provider "aws" {
 :END:
 - profile and default user
 - two regions
-  - a master region
-  - a worker region
+  - a master region (us-east-1)
+  - a worker region (us-west-2)
 - external ip (yours)
 - workers count (how many instances to create)
 - instance type when deploying EC2
@@ -571,6 +571,7 @@ resource "aws_key_pair" "worker-key" {
 #+begin_src json
 resource "aws_iam_role" "ec2_full_access" {
 name = "ec2_access"
+region = us-east-1
 assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
