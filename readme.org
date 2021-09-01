@@ -571,7 +571,6 @@ resource "aws_key_pair" "worker-key" {
 #+begin_src json
 resource "aws_iam_role" "ec2_full_access" {
 name = "ec2_access"
-region = us-east-1
 assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
