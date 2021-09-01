@@ -656,7 +656,7 @@ resource "aws_instance" "jenkins-master" {
   vpc_security_group_ids      = [aws_security_group.jenkins-sg.id]
   subnet_id                   = aws_subnet.subnet_1.id
   user_data                   = data.template_file.user_data.rendered
-  iam_instance_profile = "${aws_iam_instance_profile.test_profile.name}"
+#  iam_instance_profile = "${aws_iam_instance_profile.test_profile.name}"
   tags = {
     Name = "jenkins_master_tf"
   }
