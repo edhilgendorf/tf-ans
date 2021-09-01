@@ -830,20 +830,10 @@ rsync -vaP ~/.aws/credentials ec2-user@$(terraform output -json | jq  -r '."Jenk
 #+end_src
 ** Dynamic Inventory :dynamic_inventory:
 https://aws.amazon.com/blogs/apn/getting-started-with-ansible-and-dynamic-amazon-ec2-inventory-management/
-*** [[../ansible-cloud/ansible-inventory.yml]]
-:PROPERTIES:
-:header-args: :tangle ../ansible-cloud/ansible-inventory.yaml
-:END:
-#+begin_src yml
----
-# variables from dynamic inventory
-- name: variables from dynamic inventory
-  hosts: localhost
-  remote_user: ec2-user
-  collections:
-  - amazon.aws.aws_ec2
-#+end_src
 *** [[../ansible-cloud/ansible.cfg]]
+- enable the aws_ec2 plugin
+- set the inventory file to our dynamic inventory
+- set remote_user
 :PROPERTIES:
 :header-args: :tangle ../ansible-cloud/ansible.cfg
 :END:
@@ -853,7 +843,7 @@ enable_plugins = aws_ec2
 [defaults]
 inventory = /ansible-cloud/ansible-inventory.yml
 #+end_src
-*** [[../ansible-cloud/aws_ec2.yml
+*** [[../ansible-cloud/aws_ec2.yml]]
 :PROPERTIES:
 :header-args: :tangle ../ansible-cloud/aws_ec2.yml
 :END:
