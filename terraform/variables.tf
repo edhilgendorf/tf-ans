@@ -31,3 +31,8 @@ variable "ansible-git" {
   type    = string
   default = "https://github.com/edhilgendorf/ansible-cloud.git"
 }
+variable "iam_policy_ec2_full_arn" {
+  description = "IAM Policy for full EC2"
+  type = "string"
+  default = "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
+}

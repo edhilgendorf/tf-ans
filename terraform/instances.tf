@@ -26,6 +26,11 @@ resource "aws_key_pair" "worker-key" {
   public_key = file("ssh/id_rsa.pub")
 }
 
+resource "aws_iam_role" "ec2_full_access" {
+name = "ec2_access"
+managed_policy_arns = var.iam_policy_ec2_full_arn
+}
+
 #Create and bootstrap EC2 in us-east-1
 resource "aws_instance" "jenkins-master" {
   provider                    = aws.region-master
