@@ -864,3 +864,5 @@ terraform output -json | jq  -r '."Jenkins-Main-Node-Public-IP"."value"'
 #+begin_src bash
 aws sts decode-authorization-message --encoded-message "<your message here>"
 #+end_src
+** Unrelated Errors :error:region:
+- While creating and attaching the EC2 Role's I was repeatedly getting an error saying "Region must be set". I troubleshot this for days until I finally realized what was really happening -- The Terraform user (part of IAM) did not have permission to create IAM roles. After updating that role the region error disappeared. Always check your policy when adding new resources to ensure it is allowed and prevent wasting time.
