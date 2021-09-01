@@ -40,10 +40,9 @@ assume_role_policy = jsonencode({
         }
       },
     ]
-    ]
 })
 #managed_policy_arns = var.iam_policy_ec2_full_arn
-managed_policy_arns = "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
+managed_policy_arns = ["arn:aws:iam::aws:policy/AmazonEC2FullAccess"]
 }
 
 #Create and bootstrap EC2 in us-east-1
