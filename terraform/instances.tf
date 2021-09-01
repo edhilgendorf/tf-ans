@@ -29,7 +29,7 @@ resource "aws_key_pair" "worker-key" {
 resource "aws_iam_role" "ec2_full_access" {
 name = "ec2_access"
 assume_role_policy = jsonencode({
-    Version = "2012-10-17"
+#    Version = "2012-10-17"
     Statement = [
       {
         Action = "sts:AssumeRole"
@@ -41,7 +41,6 @@ assume_role_policy = jsonencode({
       },
     ]
 })
-#managed_policy_arns = var.iam_policy_ec2_full_arn
 managed_policy_arns = ["arn:aws:iam::aws:policy/AmazonEC2FullAccess"]
 }
 
