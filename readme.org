@@ -747,3 +747,10 @@ ssh -o StrictHostKeyChecking=no ec2-user@$(terraform output -json | jq  -r '."Je
   #+begin_src sh
 terraform output -json | jq  -r '."Jenkins-Main-Node-Public-IP"."value"'
   #+end_src
+* Troubleshooting :troubleshooting:
+** Encoded Messages :sts:error:
+- You can get an error message from AWS, in Terraform output in an encoded message. You can decode this on the CLI:
+  + note: may need to apply ~sts:~ to your user's role to view the contents.
+#+begin_src bash
+aws sts decode-authorization-message --encoded-message "<your message here>"
+#+end_src
