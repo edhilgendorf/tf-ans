@@ -24,10 +24,6 @@ The purpose of this is to build a cloud based project using IaC that explains *w
 - [[https://edhilgendorf.github.io/tf-ans/][Read the docs]]
 - [[https://hilgendorf.me][hilgendorf.me]]
 * Conventions
-** syntax
-| type         | example      |
-|--------------+--------------|
-| ~custom input~ | ~<your_input>~ |
 ** Code Example
 - Each block will be named as above
 - Following will be bullet points with an explanation and /hopefully/ a link to the corresponding resource
@@ -38,6 +34,7 @@ The purpose of this is to build a cloud based project using IaC that explains *w
 - This prints "hello world" to the user on execution
   #+begin_src python
 print ("hello world")
+print("1")
   #+end_src
 ** File structure
 - Since Terraform runs are repo driven, anytime an update hits it will queue up a run. In order to save money on AWS, and lower the number of runs, create a working directory in Terraform Cloud, then relocate all Terraform code to that directory.
