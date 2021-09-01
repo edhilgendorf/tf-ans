@@ -33,6 +33,6 @@ variable "ansible-git" {
 }
 variable "iam_policy_ec2_full_arn" {
   description = "IAM Policy for full EC2"
-  type = "string"
+  type = string
   default = "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
 }
