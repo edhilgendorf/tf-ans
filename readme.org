@@ -506,30 +506,7 @@ resource "aws_security_group" "jenkins-sg-oregon" {
 }
 #+end_src
 ** Create IAM Role for EC2 Access :ec2:iam:
-*** [[./terraform/iam.tf]]
-:PROPERTIES:
-:header-args: :tangle no
-:END:
-#+begin_src json
-#resource "aws_iam_role" "ec2_full_access" {
-#name = "ec2_access"
-#assume_role_policy = jsonencode({
-##    Version = "2012-10-17"
-#    Statement = [
-#      {
-#        Action = "sts:AssumeRole"
-#        Effect = "Allow"
-#        Sid    = ""
-#        Principal = {
-#          Service = "ec2.amazonaws.com"
-#        }
-#      },
-#    ]
-#})
-#managed_policy_arns = ["arn:aws:iam::aws:policy/AmazonEC2FullAccess"]
-#}
-#+end_src
-*** [[./terraform/iam.tf]]
+*** [[./terraform/iam.tf]] :aws_iam_role:
 :PROPERTIES:
 :header-args: :tangle terraform/iam.tf
 :END:
@@ -556,12 +533,23 @@ EOF
       tag-key = "tag-value"
   }
 }
-
+#+end_src
+*** [[./terraform/iam.tf]] :aws_iam_instance_profile:
+:PROPERTIES:
+:header-args: :tangle terraform/iam.tf
+:END:
+#+begin_src json
 resource "aws_iam_instance_profile" "test_profile" {
   name = "test_profile"
  provider                    = aws.region-master
   role = "${aws_iam_role.test_role.name}"
 }
+#+end_src
+*** [[./terraform/iam.tf]] :aws_iam_role_policy:
+:PROPERTIES:
+:header-args: :tangle terraform/iam.tf
+:END:
+#+begin_src json
 resource "aws_iam_role_policy" "test_policy" {
   name = "test_policy"
 provider                    = aws.region-master

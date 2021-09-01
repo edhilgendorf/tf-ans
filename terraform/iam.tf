@@ -26,6 +26,7 @@ resource "aws_iam_instance_profile" "test_profile" {
  provider                    = aws.region-master
   role = "${aws_iam_role.test_role.name}"
 }
+
 resource "aws_iam_role_policy" "test_policy" {
   name = "test_policy"
 provider                    = aws.region-master
