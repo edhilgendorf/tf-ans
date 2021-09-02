@@ -98,6 +98,7 @@ sudo apt-get update && sudo apt-get install packer
   https://console.aws.amazon.com/iam/home?region=us-east-1#/security_credentials$access_key
 *** attach a base policy :policy:
 [[./terraform/policies/base.json]]
+- this is very much a WIP, and some of these are *wide* open, such as IAM while working through issues.
 #+begin_src json
 {
   "Version": "2012-10-17",
