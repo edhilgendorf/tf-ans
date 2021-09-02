@@ -4,19 +4,20 @@
 See: https://edhilgendorf.github.io/tf-ans/
 * The project
 Project is to use this repository ( and possibly a couple others ) to build and deploy a web application using some core technologies:
-- AWS for cloud housting
-  + [[*Configure AWS][Configure AWS]]
-- GitHub to host code, configs, and static site: https://edhilgendorf.github.io/tf-ans/
-- Terraform Cloud ( free ) to handle state and Terrafrom deployments upon check-in with GitHub
-  + [[*Configure Terraform Cloud][Configure Terraform Cloud]]
-- Terraform to provision AWS
-  + [[*Create Infrastructure with Terraform][Create Infrastructure with Terraform]]
-- Cloud-init for any VMs
-  + [[*Bootstrap EC2 with cloud-init][Bootstrap EC2 with cloud-init]]
-- Ansible for config management
-  + [[*Configuration Management with Ansible][Configuration Management with Ansible]]
-- Jenkins to deploy the application
-- An application /(TBD)/
+** DONE AWS for cloud housting
+- [[*Configure AWS][Configure AWS]]
+** DONE GitHub to host code, configs, and static site: https://edhilgendorf.github.io/tf-ans/
+** DONE Terraform Cloud ( free ) to handle state and Terrafrom deployments upon check-in with GitHub
+- [[*Configure Terraform Cloud][Configure Terraform Cloud]]
+** Terraform to provision AWS
+ + [[*Create Infrastructure with Terraform][Create Infrastructure with Terraform]]
+** TODO Cloud-init for any VMs
+ + [[*Bootstrap EC2 with cloud-init][Bootstrap EC2 with cloud-init]]
++ Ansible for config management
+ + [[*Configuration Management with Ansible][Configuration Management with Ansible]]
++ Jenkins to deploy the application
++ An application /(TBD)/ inside a Docker Container
++ Ansible to Deploy Kubernetes
 ** This Document
 Documentation and code are built into this same [[https://orgmode.org/][orgmode]] document. All the code in this repository is created from snippets in this document via org-tangle. The process is as follows:
 1. Create a new bullet point/update old one
