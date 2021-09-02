@@ -34,6 +34,9 @@ The purpose of this is to build a cloud based project using IaC that explains *w
 ** Challenges
 - Secrets :: The idea is this entire document and project are available so anyone can see how it is setup and the output at the end. This means no plaintext passwords and having to be carefeul with key-pairs.
 - VCS Driven from Terraform Cloud :: This has been the most difficult. I have seen before, and do not want to end up with a situation where you have to run Bash/etc scripts from different locations to get to the required end-state, so I decided to use VCS as "single source of truth" and have all Terraform deployed from Terraform Cloud. This rules out a lot of things: using Terraform outputs in Ansible/etc scripts, as well as using local provisioners. That being said, Terraform recommends against local-exec provisioners so I think it's a good step, regardless.
+** TODOs
+*** TODO Fix base policy for Terraform user
+*** TODO Get outputs into this document as an export
 * Conventions
 ** Code Example
 - Each block will be named as above
