@@ -5,9 +5,16 @@ See: https://edhilgendorf.github.io/tf-ans/
 * The project
 Project is to use this repository ( and possibly a couple others ) to build and deploy a web application using some core technologies:
 - AWS for cloud housting
+  + [[*Configure AWS][Configure AWS]]
+- GitHub to host code, configs, and static site: https://edhilgendorf.github.io/tf-ans/
+- Terraform Cloud ( free ) to handle state and Terrafrom deployments upon check-in with GitHub
+  + [[*Configure Terraform Cloud][Configure Terraform Cloud]]
 - Terraform to provision AWS
+  + [[*Create Infrastructure with Terraform][Create Infrastructure with Terraform]]
 - Cloud-init for any VMs
+  + [[*Bootstrap EC2 with cloud-init][Bootstrap EC2 with cloud-init]]
 - Ansible for config management
+  + [[*Configuration Management with Ansible][Configuration Management with Ansible]]
 - Jenkins to deploy the application
 - An application /(TBD)/
 ** This Document
@@ -23,6 +30,9 @@ The purpose of this is to build a cloud based project using IaC that explains *w
 - [[https://github.com/edhilgendorf/ansible-cloud][Ansible Project Repository]]
 - [[https://edhilgendorf.github.io/tf-ans/][Read the docs]]
 - [[https://hilgendorf.me][hilgendorf.me]]
+** Challenges
+- Secrets :: The idea is this entire document and project are available so anyone can see how it is setup and the output at the end. This means no plaintext passwords and having to be carefeul with key-pairs.
+- VCS Driven from Terraform Cloud :: This has been the most difficult. I have seen before, and do not want to end up with a situation where you have to run Bash/etc scripts from different locations to get to the required end-state, so I decided to use VCS as "single source of truth" and have all Terraform deployed from Terraform Cloud. This rules out a lot of things: using Terraform outputs in Ansible/etc scripts, as well as using local provisioners. That being said, Terraform recommends against local-exec provisioners so I think it's a good step, regardless.
 * Conventions
 ** Code Example
 - Each block will be named as above

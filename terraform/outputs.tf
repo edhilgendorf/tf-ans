@@ -8,3 +8,10 @@ output "Jenkins-Worker-Public-IPs" {
     instance.id => instance.public_ip
   }
 }
+
+output "Jenkins-Worker-Public-IPs" {
+  value = {
+    for instance in aws_instance.jenkins-worker-oregon :
+    instance.id => instance.public_ip
+  }
+}
