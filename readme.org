@@ -904,15 +904,15 @@ keyed_groups:
   + ex: ~terraform taint aws_instance.jenkins-master~
 - execute a remote command to your EC2 instance
   #+begin_src sh
-ssh -o StrictHostKeyChecking=no ec2-user@$(terraform output -json | jq  -r '."Jenkins-Main-Node-Public-IP"."value"') "sudo grep 'cathead' /var/log/cloud-init-output.log"
+ssh -o StrictHostKeyChecking=no ec2-user@$(terraform output -json | jq  -r '."Devops-Main-Node-Public-IP"."value"') "sudo grep 'cathead' /var/log/cloud-init-output.log"
   #+end_src
 - ssh to your EC2 instance
   #+begin_src sh
-ssh -o StrictHostKeyChecking=no ec2-user@$(terraform output -json | jq  -r '."Jenkins-Main-Node-Public-IP"."value"')
+ssh -o StrictHostKeyChecking=no ec2-user@$(terraform output -json | jq  -r '."Devops-Main-Node-Public-IP"."value"')
   #+end_src
 - get IP of an instance
   #+begin_src sh
-terraform output -json | jq  -r '."Jenkins-Main-Node-Public-IP"."value"'
+terraform output -json | jq  -r '."Devops-Main-Node-Public-IP"."value"'
   #+end_src
 * Troubleshooting :troubleshooting:
 ** Encoded Messages :sts:error:
