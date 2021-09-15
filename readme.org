@@ -809,6 +809,14 @@ resource "aws_s3_bucket" "misc-data" {
 #  }
 }
 #+end_src
+- Currently getting error when creating, seemingly unable to add/list tags, commenting out until further investigation.
+  #+begin_src
+Error: error updating S3 Bucket (hilgendorf-misc-data) tags: error listing resource tags (hilgendorf-misc-data): AccessDenied: Access Denied status code: 403, request id: TR6J0XR2TT65SF3N, host id: 53e1UhXXF/V7BXwyudSim+1LG895eIc0dL2+5RDVA7lRdjmxzuzyKDb7eCGCgFlGGEMNHGOBwsM=
+with aws_s3_bucket.misc-data
+on s3.tf line 1, in resource "aws_s3_bucket" "misc-data":
+
+resource "aws_s3_bucket" "misc-data" {
+  #+end_src
 * Bootstrap EC2 with cloud-init :cloud_init:
 - https://cloudinit.readthedocs.io/en/latest/
 - https://cloudinit.readthedocs.io/en/latest/topics/examples.html
