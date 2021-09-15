@@ -821,6 +821,23 @@ resource "aws_s3_bucket" "misc-data" {
   #+end_src
 
   + Issue was due to *IAM*, policy updated [[*Create IAM User and Policies][Create IAM User and Policies]] but need to further refine. This worked after giving ~"s3:*"~ to ~terraform-user~
+** Create Outputs :output:
+*** [[./terraform/outputs.tf]] :outputs:
+:PROPERTIES:
+:header-args: :tangle terraform/outputs.tf
+:END:
+#+begin_src json
+output "Devops-Main-Node-Public-IP" {
+  value = aws_instance.devops-master.public_ip
+}
+
+output "Devops-Worker-Public-IPs" {
+  value = {
+    for instance in aws_instance.devops-worker-oregon :
+    instance.id => instance.public_ip
+  }
+}
+#+end_src
 * Bootstrap EC2 with cloud-init :cloud_init:
 - https://cloudinit.readthedocs.io/en/latest/
 - https://cloudinit.readthedocs.io/en/latest/topics/examples.html
