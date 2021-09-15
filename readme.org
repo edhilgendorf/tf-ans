@@ -81,6 +81,7 @@ sudo apt-get update && sudo apt-get install packer
 - Register account: https://portal.aws.amazon.com/gp/aws/developer/registration/index.html
 ** Setup AWS CLI :cli:install:
 - https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html
+** Use AWS CLI :cli:
 ** Create IAM User and Policies :iam:
 - IAM: https://console.aws.amazon.com/iam/home
 - Polcies: https://console.aws.amazon.com/iamv2/home?#/policiesC
@@ -197,6 +198,7 @@ sudo apt-get update && sudo apt-get install packer
         "ssm:GetParameters",
         "ssm:GetParametersByPath",
         "s3:CreateBucket",
+        "s3:*",
         "s3:DeleteBucket",
         "s3:DeleteObject",
         "s3:GetBucketLocation",
@@ -817,6 +819,8 @@ on s3.tf line 1, in resource "aws_s3_bucket" "misc-data":
 
 resource "aws_s3_bucket" "misc-data" {
   #+end_src
+
+  + Issue was due to *IAM*, policy updated [[*Create IAM User and Policies][Create IAM User and Policies]] but need to further refine. This worked after giving ~"s3:*"~ to ~terraform-user~
 * Bootstrap EC2 with cloud-init :cloud_init:
 - https://cloudinit.readthedocs.io/en/latest/
 - https://cloudinit.readthedocs.io/en/latest/topics/examples.html
@@ -829,7 +833,6 @@ resource "aws_s3_bucket" "misc-data" {
 + jenkins-master will also be ansible master
 + create ssh key
 + copy it to ec2-user known keys
-+
 #+begin_src yaml
 #cloud-config
 package_update: true
@@ -852,6 +855,11 @@ runcmd:
   - pip3 install boto3
   - sudo mkdir -p /opt/ansible/inventory
 #+end_src
+** [[./terraform/scripts/cloud-init.yaml]] :cloudinit:script:
+:PROPERTIES:
+:header-args: :tangle terraform/scripts/cloud-init.yaml
+:END:
+- We need to get public SSH keys synced from master. Current plan is to add S3 ([[*Create S3 Bucket for storage][Create S3 Bucket for storage]]) IAM ([[*Create IAM Role for EC2 Access][Create IAM Role for EC2 Access]]) roles to the EC2 instances so they can add and download keys via AWS CLI ([[*Use AWS CLI][Use AWS CLI]])
 * Configuration Management with Ansible :ansible:
 - This will be focused on a new repository: [[https://github.com/edhilgendorf/ansible-cloud.git][ansible-cloud]]
 - From here we will provision all agent EC2 instances created in [[*Create Infrastructure with Terraform][Create Infrastructure with Terraform]] with Ansible, starting with Jenkins
