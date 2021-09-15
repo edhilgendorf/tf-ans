@@ -5,7 +5,7 @@ resource "aws_vpc" "vpc_master" {
   enable_dns_support   = true
   enable_dns_hostnames = true
   tags = {
-    Name = "master-vpc-jenkins"
+    Name = "master-vpc-devops"
   }
 }
 #Create VPC in us-west-2
@@ -15,7 +15,7 @@ resource "aws_vpc" "vpc_master_oregon" {
   enable_dns_support   = true
   enable_dns_hostnames = true
   tags = {
-    Name = "worker-vpc-jenkins"
+    Name = "worker-vpc-devops"
   }
 }
 
