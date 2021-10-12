@@ -36,7 +36,7 @@ The purpose of this is to build a cloud based project using IaC that explains *w
 - Secrets :: The idea is this entire document and project are available so anyone can see how it is setup and the output at the end. This means no plaintext passwords and having to be carefeul with key-pairs.
 - VCS Driven from Terraform Cloud :: This has been the most difficult. I have seen before, and do not want to end up with a situation where you have to run Bash/etc scripts from different locations to get to the required end-state, so I decided to use VCS as "single source of truth" and have all Terraform deployed from Terraform Cloud. This rules out a lot of things: using Terraform outputs in Ansible/etc scripts, as well as using local provisioners. That being said, Terraform recommends against local-exec provisioners so I think it's a good step, regardless.
 ** Conventions :conventions:
-*** Code Example
+*** Code Example :example:
 - Each block will be named as above
 - Following will be bullet points with an explanation and /hopefully/ a link to the corresponding resource
 **** [[./terraform/example_code.py]] <-- the file that will be "tangled", see [[*This Document][This Document]]
@@ -102,7 +102,10 @@ sudo apt-get update && sudo apt-get install packer
 - Add root user as default, or create IAM admin:
   https://console.aws.amazon.com/iam/home?region=us-east-1#/security_credentials$access_key
 *** IAM Terraform User _start_ :policy:
-[[./terraform/policies/terraform_user.json]]
+**** [[./terraform/policies/terraform_user.json]]
+:PROPERTIES:
+:header-args: :tangle terraform/policies/terraform_user.json
+:END:
 - this is very much a WIP, and some of these are *wide* open, such as IAM while working through issues.
 - I am splitting this up so that each terraform module used get's it's IAM actions in the same bullet point/section.
 - See [[#-iam-terraform-user--end--][IAM Terraform User _end_]]
@@ -841,9 +844,13 @@ resource "aws_efs_file_system" "dev" {
 :CUSTOM_ID: -create-infrastructure-with-terraform-ecs-for-awx-
 :END:
 - An Amazon ECS service allows you to run and maintain a specified number of instances of a task definition simultaneously in an Amazon ECS cluster. If any of your tasks should fail or stop for any reason, the Amazon ECS service scheduler launches another instance of your task definition to replace it in order to maintain the desired number of tasks in the service.
+*** [[./terraform/policies/terraform_user.json]]
 :PROPERTIES:
-:CUSTOM_ID: -create-infrastructure-with-terraform-ecs-for-awx-
+:header-args: :tangle terraform/policies/terraform_user.json
 :END:
+#+begin_src json
+        "elasticfilesystem:*",
+#+end_src
 *** [[./terraform/ecs.tf]]
 :PROPERTIES:
 :header-args: :tangle terraform/ecs.tf
@@ -973,7 +980,10 @@ keyed_groups:
 :PROPERTIES:
 :CUSTOM_ID: -iam-terraform-user--end--
 :END:
-[[./terraform/policies/terraform_user.json]]
+** [[./terraform/policies/terraform_user.json]]
+:PROPERTIES:
+:header-args: :tangle terraform/policies/terraform_user.json
+:END:
 #+begin_src json
       ],
       "Effect": "Allow",
