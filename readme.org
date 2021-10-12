@@ -4,18 +4,19 @@
 See: https://edhilgendorf.github.io/tf-ans/
 * The project
 Project is to use this repository ( and possibly a couple others ) to build and deploy a web application using some core technologies:
-** DONE AWS for cloud housting
+** Technologies used/steps
+*** DONE AWS for cloud housting
 - [[*Configure AWS][Configure AWS]]
-** DONE GitHub to host code, configs, and static site: https://edhilgendorf.github.io/tf-ans/
-** DONE Terraform Cloud ( free ) to handle state and Terrafrom deployments upon check-in with GitHub
+*** DONE GitHub to host code, configs, and static site: https://edhilgendorf.github.io/tf-ans/
+*** DONE Terraform Cloud ( free ) to handle state and Terrafrom deployments upon check-in with GitHub
 - [[*Configure Terraform Cloud][Configure Terraform Cloud]]
-** Terraform to provision AWS
- + [[*Create Infrastructure with Terraform][Create Infrastructure with Terraform]]
-** TODO Cloud-init for any VMs
+*** Terraform to provision AWS
+ + [[#-create-infrastructure-with-terraform-][Create Infrastructure with Terraform]]
+*** TODO Cloud-init for any VMs
  + [[*Bootstrap EC2 with cloud-init][Bootstrap EC2 with cloud-init]]
-+ Ansible for config management
- + [[*Configuration Management with Ansible][Configuration Management with Ansible]]
-+ Jenkins to deploy the application
+*** Ansible for config management, hosted on
++ [[*Configuration Management with Ansible][Configuration Management with Ansible]] on [[#-create-infrastructure-with-terraform-ecs-for-awx-][ECS for AWX]]
+*** Jenkins to deploy the application [[#-create-infrastructure-with-terraform-ecs-for-awx-][ECS for AWX]]
 + An application /(TBD)/ inside a Docker Container
 + Ansible to Deploy Kubernetes
 ** This Document
@@ -34,14 +35,11 @@ The purpose of this is to build a cloud based project using IaC that explains *w
 ** Challenges
 - Secrets :: The idea is this entire document and project are available so anyone can see how it is setup and the output at the end. This means no plaintext passwords and having to be carefeul with key-pairs.
 - VCS Driven from Terraform Cloud :: This has been the most difficult. I have seen before, and do not want to end up with a situation where you have to run Bash/etc scripts from different locations to get to the required end-state, so I decided to use VCS as "single source of truth" and have all Terraform deployed from Terraform Cloud. This rules out a lot of things: using Terraform outputs in Ansible/etc scripts, as well as using local provisioners. That being said, Terraform recommends against local-exec provisioners so I think it's a good step, regardless.
-** TODOs
-*** TODO Fix base policy for Terraform user
-*** TODO Get outputs into this document as an export
-* Conventions
-** Code Example
+** Conventions :conventions:
+*** Code Example
 - Each block will be named as above
 - Following will be bullet points with an explanation and /hopefully/ a link to the corresponding resource
-*** [[./terraform/example_code.py]] <-- the file that will be "tangled", see [[*This Document][This Document]]
+**** [[./terraform/example_code.py]] <-- the file that will be "tangled", see [[*This Document][This Document]]
 :PROPERTIES:
 :header-args: :tangle terraform/example_code.py
 :END:
@@ -50,7 +48,7 @@ The purpose of this is to build a cloud based project using IaC that explains *w
 print ("hello world")
 print("1")
   #+end_src
-** File structure
+*** File structure
 - Since Terraform runs are repo driven, anytime an update hits it will queue up a run. In order to save money on AWS, and lower the number of runs, create a working directory in Terraform Cloud, then relocate all Terraform code to that directory.
   + https://www.terraform.io/docs/cloud/workspaces/settings.html
 - It is then possible to trigger runs only on working directories
@@ -103,10 +101,11 @@ sudo apt-get update && sudo apt-get install packer
  #+end_src
 - Add root user as default, or create IAM admin:
   https://console.aws.amazon.com/iam/home?region=us-east-1#/security_credentials$access_key
-*** IAM Base Policy Start :policy:
-[[./terraform/policies/base.json]]
+*** IAM Terraform User _start_ :policy:
+[[./terraform/policies/terraform_user.json]]
 - this is very much a WIP, and some of these are *wide* open, such as IAM while working through issues.
 - I am splitting this up so that each terraform module used get's it's IAM actions in the same bullet point/section.
+- See [[#-iam-terraform-user--end--][IAM Terraform User _end_]]
 #+begin_src json
 {
   "Version": "2012-10-17",
@@ -239,6 +238,9 @@ terraform {
 }
 #+end_src
 * Create Infrastructure with Terraform :terraform:iac:
+:PROPERTIES:
+:CUSTOM_ID: -create-infrastructure-with-terraform-
+:END:
 ** Configure Providers
 *** [[./terraform/providers.tf]]
 :PROPERTIES:
@@ -792,8 +794,11 @@ resource "aws_instance" "devops-worker-oregon" {
   depends_on = [aws_main_route_table_association.set-worker-default-rt-assoc, aws_instance.devops-master]
 }
 #+end_src
-**  /*Will be instead attaching EFS*/ Create S3 Bucket for storage :s3:
-- Attaching an S3 bucket to hold public key pairs for SSH access and other miscellaneous data that may be needed during/post provisioning.
+** S3 :s3:
+:PROPERTIES:
+:CUSTOM_ID: -create-infrastructure-with-terraform-s3-
+:END:
+- Attaching an S3 bucket to hold  miscellaneous data that may be needed during/post provisioning.
 *** [[./terraform/s3.tf]] :aws_s3:
 :PROPERTIES:
 :header-args: :tangle terraform/s3.tf
@@ -828,6 +833,44 @@ resource "aws_efs_file_system" "dev" {
   provider  = aws.region-master
   tags = {
     Name = "keys"
+  }
+}
+#+end_src
+** ECS for AWX :awx:ecs:
+:PROPERTIES:
+:CUSTOM_ID: -create-infrastructure-with-terraform-ecs-for-awx-
+:END:
+- An Amazon ECS service allows you to run and maintain a specified number of instances of a task definition simultaneously in an Amazon ECS cluster. If any of your tasks should fail or stop for any reason, the Amazon ECS service scheduler launches another instance of your task definition to replace it in order to maintain the desired number of tasks in the service.
+:PROPERTIES:
+:CUSTOM_ID: -create-infrastructure-with-terraform-ecs-for-awx-
+:END:
+*** [[./terraform/ecs.tf]]
+:PROPERTIES:
+:header-args: :tangle terraform/ecs.tf
+:END:
+#+begin_src json
+resource "aws_ecs_service" "mongo" {
+  name            = "mongodb"
+  cluster         = aws_ecs_cluster.foo.id
+  task_definition = aws_ecs_task_definition.mongo.arn
+  desired_count   = 3
+  iam_role        = aws_iam_role.foo.arn
+  depends_on      = [aws_iam_role_policy.foo]
+
+  ordered_placement_strategy {
+    type  = "binpack"
+    field = "cpu"
+  }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.foo.arn
+    container_name   = "mongo"
+    container_port   = 8080
+  }
+
+  placement_constraints {
+    type       = "memberOf"
+    expression = "attribute:ecs.availability-zone in [us-west-2a, us-west-2b]"
   }
 }
 #+end_src
@@ -886,7 +929,7 @@ runcmd:
 :PROPERTIES:
 :header-args: :tangle terraform/scripts/cloud-init.yaml
 :END:
-- We need to get public SSH keys synced from master. Current plan is to add S3 ([[*Create S3 Bucket for storage][Create S3 Bucket for storage]]) IAM ([[*Create IAM Role for EC2 Access][Create IAM Role for EC2 Access]]) roles to the EC2 instances so they can add and download keys via AWS CLI ([[*Use AWS CLI][Use AWS CLI]])
+- We need to get public SSH keys synced from master. Current plan is to add IAM ([[*Create IAM Role for EC2 Access][Create IAM Role for EC2 Access]]) roles to the EC2 instances so they can add and download keys via AWS CLI ([[*Use AWS CLI][Use AWS CLI]])
 * Configuration Management with Ansible :ansible:
 - This will be focused on a new repository: [[https://github.com/edhilgendorf/ansible-cloud.git][ansible-cloud]]
 - From here we will provision all agent EC2 instances created in [[*Create Infrastructure with Terraform][Create Infrastructure with Terraform]] with Ansible, starting with Jenkins
@@ -926,8 +969,11 @@ keyed_groups:
   - key: tags
     prefix: tag
 #+end_src
-* IAM Base Template end :policy_end:
-[[./terraform/policies/base.json]]
+* IAM Terraform User _end_ :policy_end:
+:PROPERTIES:
+:CUSTOM_ID: -iam-terraform-user--end--
+:END:
+[[./terraform/policies/terraform_user.json]]
 #+begin_src json
       ],
       "Effect": "Allow",
