@@ -794,7 +794,7 @@ resource "aws_instance" "devops-worker-oregon" {
   depends_on = [aws_main_route_table_association.set-worker-default-rt-assoc, aws_instance.devops-master]
 }
 #+end_src
-** Create S3 Bucket for storage :s3:
+**  /*Will be instead attaching EFS*/ Create S3 Bucket for storage :s3:
 - Attaching an S3 bucket to hold public key pairs for SSH access and other miscellaneous data that may be needed during/post provisioning.
 *** [[./terraform/s3.tf]] :aws_s3:
 :PROPERTIES:
@@ -812,15 +812,27 @@ resource "aws_s3_bucket" "misc-data" {
 }
 #+end_src
 - Currently getting error when creating, seemingly unable to add/list tags, commenting out until further investigation.
-  #+begin_src
-Error: error updating S3 Bucket (hilgendorf-misc-data) tags: error listing resource tags (hilgendorf-misc-data): AccessDenied: Access Denied status code: 403, request id: TR6J0XR2TT65SF3N, host id: 53e1UhXXF/V7BXwyudSim+1LG895eIc0dL2+5RDVA7lRdjmxzuzyKDb7eCGCgFlGGEMNHGOBwsM=
-with aws_s3_bucket.misc-data
-on s3.tf line 1, in resource "aws_s3_bucket" "misc-data":
+  + error:
+    Error: error updating S3 Bucket (hilgendorf-misc-data) tags: error listing resource tags (hilgendorf-misc-data): AccessDenied: Access Denied status code: 403, request id: TR6J0XR2TT65SF3N, host id: 53e1UhXXF/V7BXwyudSim+1LG895eIc0dL2+5RDVA7lRdjmxzuzyKDb7eCGCgFlGGEMNHGOBwsM=
+    with aws_s3_bucket.misc-data
+    on s3.tf line 1, in resource "aws_s3_bucket" "misc-data":
 
-resource "aws_s3_bucket" "misc-data" {
-  #+end_src
-
+    resource "aws_s3_bucket" "misc-data" {
   + Issue was due to *IAM*, policy updated [[*Create IAM User and Policies][Create IAM User and Policies]] but need to further refine. This worked after giving ~"s3:*"~ to ~terraform-user~
+** Create EFS :efs:
+*** [[./terraform/efs.tf]]
+:PROPERTIES:
+:header-args: :tangle terraform/efs.tf
+:END:
+#+begin_src json
+resource "aws_efs_file_system" "dev" {
+  creation_token = "dev-volume"
+
+  tags = {
+    Name = "keys"
+  }
+}
+#+end_src
 ** Create Outputs :output:
 *** [[./terraform/outputs.tf]] :outputs:
 :PROPERTIES:
