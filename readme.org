@@ -83,6 +83,9 @@ sudo apt-get update && sudo apt-get install packer
 - https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html
 ** Use AWS CLI :cli:
 ** Create IAM User and Policies :iam:
+:PROPERTIES:
+:CUSTOM_ID: -configure-aws-create-iam-user-and-policies-
+:END:
 - IAM: https://console.aws.amazon.com/iam/home
 - Polcies: https://console.aws.amazon.com/iamv2/home?#/policiesC
 - IAM User: https://console.aws.amazon.com/iam/home#/users$new?step=details
@@ -100,9 +103,10 @@ sudo apt-get update && sudo apt-get install packer
  #+end_src
 - Add root user as default, or create IAM admin:
   https://console.aws.amazon.com/iam/home?region=us-east-1#/security_credentials$access_key
-*** attach a base policy :policy:
+*** IAM Base Policy Start :policy:
 [[./terraform/policies/base.json]]
 - this is very much a WIP, and some of these are *wide* open, such as IAM while working through issues.
+- I am splitting this up so that each terraform module used get's it's IAM actions in the same bullet point/section.
 #+begin_src json
 {
   "Version": "2012-10-17",
@@ -207,12 +211,6 @@ sudo apt-get update && sudo apt-get install packer
         "s3:ListBucket",
         "iam:*",
         "s3:PutObject"
-      ],
-      "Effect": "Allow",
-      "Resource": "*"
-    }
-  ]
-}
 #+end_src
 * Configure Terraform Cloud :cloud:terraform_cloud:
 - Regsiter account: https://app.terraform.io/signup/account?utm_source=terraform_io&utm_content=terraform_cloud_top_nav
@@ -927,6 +925,16 @@ plugin: aws_ec2
 keyed_groups:
   - key: tags
     prefix: tag
+#+end_src
+* IAM Base Template end :policy_end:
+[[./terraform/policies/base.json]]
+#+begin_src json
+      ],
+      "Effect": "Allow",
+      "Resource": "*"
+    }
+  ]
+}
 #+end_src
 * Useful Commands
 - ~taint~: taint a resource to be replaced. This might be useful to retest a cloud-init script without recreating all of your infrastructure.

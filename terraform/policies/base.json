@@ -53,6 +53,7 @@
         "ec2:UpdateSecurityGroupRuleDescriptionsEgress",
         "ec2:UpdateSecurityGroupRuleDescriptionsIngress",
         "acm:*",
+        "elasticfilesystem:*",
         "elasticloadbalancing:AddListenerCertificates",
         "elasticloadbalancing:AddTags",
         "elasticloadbalancing:CreateListener",
