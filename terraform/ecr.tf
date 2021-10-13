@@ -10,9 +10,6 @@ resource "aws_ecr_repository" "images" {
   }
 }
 
-provider "aws" {
-  region = var.region-master
-}
 resource "aws_ecr_repository_policy" "demo-repo-policy" {
   repository = aws_ecr_repository.images.name
   policy     = <<EOF
