@@ -856,10 +856,12 @@ resource "aws_efs_file_system" "dev" {
 #+end_src
 **** [[./terraform/ecr.tf]]
 :PROPERTIES:
-:header-args: :tangle no
-:END:
 :header-args: :tangle terraform/ecr.tf
+:END:
 #+begin_src json
+provider "aws" {
+  region = var.region-master
+}
 resource "aws_ecr_repository" "images" {
   name                 = "docker_images"
   image_tag_mutability = "MUTABLE"
