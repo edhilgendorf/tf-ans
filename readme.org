@@ -4,7 +4,7 @@
 See: https://edhilgendorf.github.io/tf-ans/
 * The project
 Project is to use this repository ( and possibly a couple others ) to build and deploy a web application using some core technologies:
-** Technologies used/steps
+** Technologies used
 *** DONE AWS for cloud housting
 - [[*Configure AWS][Configure AWS]]
 *** DONE GitHub to host code, configs, and static site: https://edhilgendorf.github.io/tf-ans/
@@ -14,9 +14,9 @@ Project is to use this repository ( and possibly a couple others ) to build and 
  + [[#-create-infrastructure-with-terraform-][Create Infrastructure with Terraform]]
 *** TODO Cloud-init for any VMs
  + [[*Bootstrap EC2 with cloud-init][Bootstrap EC2 with cloud-init]]
-*** Ansible for config management, hosted on
+*** Ansible for config management
 + [[*Configuration Management with Ansible][Configuration Management with Ansible]] on [[#-create-infrastructure-with-terraform-ecs-for-awx-][ECS for AWX]]
-*** Jenkins to deploy the application [[#-create-infrastructure-with-terraform-ecs-for-awx-][ECS for AWX]]
+*** Jenkins to deploy the application
 + An application /(TBD)/ inside a Docker Container
 + Ansible to Deploy Kubernetes
 ** This Document
@@ -844,16 +844,33 @@ resource "aws_efs_file_system" "dev" {
 :CUSTOM_ID: -create-infrastructure-with-terraform-ecs-for-awx-
 :END:
 - An Amazon ECS service allows you to run and maintain a specified number of instances of a task definition simultaneously in an Amazon ECS cluster. If any of your tasks should fail or stop for any reason, the Amazon ECS service scheduler launches another instance of your task definition to replace it in order to maintain the desired number of tasks in the service.
-*** [[./terraform/policies/terraform_user.json]]
+*** ECR
+- Need to create an ECR to store our [[#-configuration-management-with-ansible-awx-][AWX]] image.
+**** [[./terraform/ecr.tf]]
+:PROPERTIES:
+:header-args: :tangle terraform/ecr.tf
+:END:
+#+begin_src json
+resource "aws_ecr_repository" "images" {
+  name                 = "docker_images"
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+}
+#+end_src
+*** ECS _untangled_
+**** [[./terraform/policies/terraform_user.json]]
 :PROPERTIES:
 :header-args: :tangle terraform/policies/terraform_user.json
 :END:
 #+begin_src json
         "elasticfilesystem:*",
 #+end_src
-*** [[./terraform/ecs.tf]]
+**** [[./terraform/ecs.tf]]
 :PROPERTIES:
-:header-args: :tangle terraform/ecs.tf
+:header-args: :tangle no
 :END:
 #+begin_src json
 resource "aws_ecs_service" "mongo" {
@@ -976,6 +993,10 @@ keyed_groups:
   - key: tags
     prefix: tag
 #+end_src
+** AWX :awx:
+:PROPERTIES:
+:CUSTOM_ID: -configuration-management-with-ansible-awx-
+:END:
 * IAM Terraform User _end_ :policy_end:
 :PROPERTIES:
 :CUSTOM_ID: -iam-terraform-user--end--
