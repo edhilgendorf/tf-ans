@@ -106,6 +106,8 @@
 
         "elasticfilesystem:*",
 
+        "ecs:*",
+
       ],
       "Effect": "Allow",
       "Resource": "*"

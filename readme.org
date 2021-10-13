@@ -854,7 +854,7 @@ resource "aws_efs_file_system" "dev" {
 #+begin_src json
         "ecr:*",
 #+end_src
-**** [[./terraform/ecr.tf]]
+**** Create Repo [[./terraform/ecr.tf]]
 :PROPERTIES:
 :header-args: :tangle terraform/ecr.tf
 :END:
@@ -871,13 +871,135 @@ resource "aws_ecr_repository" "images" {
   }
 }
 #+end_src
-*** ECS _untangled_ :ecs:
+**** Attach a Policy [[./terraform/ecr.tf]]
+:PROPERTIES:
+:header-args: :tangle terraform/ecr.tf
+:END:
+#+begin_src json
+provider "aws" {
+  region = var.region-master
+}
+resource "aws_ecr_repository_policy" "demo-repo-policy" {
+  repository = aws_ecr_repository.images.name
+  policy     = <<EOF
+  {
+    "Version": "2008-10-17",
+    "Statement": [
+      {
+        "Sid": "adds full ecr access to the demo repository",
+        "Effect": "Allow",
+        "Principal": "*",
+        "Action": [
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:BatchGetImage",
+          "ecr:CompleteLayerUpload",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:GetLifecyclePolicy",
+          "ecr:InitiateLayerUpload",
+          "ecr:PutImage",
+          "ecr:UploadLayerPart"
+        ]
+      }
+    ]
+  }
+  EOF
+}
+#+end_src
+*** ECS :ecs:
 **** [[./terraform/policies/terraform_user.json]]
 :PROPERTIES:
 :header-args: :tangle terraform/policies/terraform_user.json
 :END:
 #+begin_src json
         "elasticfilesystem:*",
+#+end_src
+**** [[./terraform/ecs.tf]]
+:PROPERTIES:
+:header-args: :tangle no
+:END:
+#+begin_src json
+resource "aws_ecs_service" "mongo" {
+  name            = "mongodb"
+  cluster         = aws_ecs_cluster.foo.id
+  task_definition = aws_ecs_task_definition.mongo.arn
+  desired_count   = 3
+  iam_role        = aws_iam_role.foo.arn
+  depends_on      = [aws_iam_role_policy.foo]
+
+  ordered_placement_strategy {
+    type  = "binpack"
+    field = "cpu"
+  }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.foo.arn
+    container_name   = "mongo"
+    container_port   = 8080
+  }
+
+  placement_constraints {
+    type       = "memberOf"
+    expression = "attribute:ecs.availability-zone in [us-west-2a, us-west-2b]"
+  }
+}
+#+end_src
+** Create Outputs :output:
+*** [[./terraform/outputs.tf]] :outputs:
+:PROPERTIES:
+:header-args: :tangle terraform/outputs.tf
+:END:
+#+begin_src json
+output "Devops-Main-Node-Public-IP" {
+  value = aws_instance.devops-master.public_ip
+}
+
+output "Devops-Worker-Public-IPs" {
+  value = {
+    for instance in aws_instance.devops-worker-oregon :
+    instance.id => instance.public_ip
+  }
+}
+#+end_src
+**** [[./terraform/ecr.tf]]
+:PROPERTIES:
+:header-args: :tangle terraform/ecr.tf
+:END:
+#+begin_src json
+provider "aws" {
+  region = var.region-worker
+
+}
+resource "aws_ecr_repository_policy" "demo-repo-policy" {
+  repository = aws_ecr_repository.demo-repository.name
+  policy     = <<EOF
+  {
+    "Version": "2008-10-17",
+    "Statement": [
+      {
+        "Sid": "adds full ecr access to the images repository",
+        "Effect": "Allow",
+        "Principal": "*",
+        "Action": [
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:BatchGetImage",
+          "ecr:CompleteLayerUpload",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:GetLifecyclePolicy",
+          "ecr:InitiateLayerUpload",
+          "ecr:PutImage",
+          "ecr:UploadLayerPart"
+        ]
+      }
+    ]
+  }
+  #+end_src
+*** ECS :ecs:
+**** [[./terraform/policies/terraform_user.json]]
+:PROPERTIES:
+:header-args: :tangle terraform/policies/terraform_user.json
+:END:
+#+begin_src json
+        "ecs:*",
 #+end_src
 **** [[./terraform/ecs.tf]]
 :PROPERTIES:
@@ -1048,3 +1170,6 @@ aws sts decode-authorization-message --encoded-message "<your message here>"
 #+end_src
 ** Unrelated Errors :error:region:
 - While creating and attaching the EC2 Role's I was repeatedly getting an error saying "Region must be set". I troubleshot this for days until I finally realized what was really happening -- The Terraform user (part of IAM) did not have permission to create IAM roles. After updating that role the region error disappeared. Always check your policy when adding new resources to ensure it is allowed and prevent wasting time.
+** Route Tables :route_table:
+- Got an error where I could not delete my resources due to: ~Route tables are main and cannot be deleted~ in the Master-Region-RT
+- Had to manually delete the corresponding VPC and all dependencies from within AWS Console

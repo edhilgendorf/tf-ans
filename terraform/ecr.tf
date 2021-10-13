@@ -1,6 +1,5 @@
 provider "aws" {
-  region = var.region-worker
-
+  region = var.region-master
 }
 resource "aws_ecr_repository" "images" {
   name                 = "docker_images"
@@ -10,3 +9,60 @@ resource "aws_ecr_repository" "images" {
     scan_on_push = true
   }
 }
+
+provider "aws" {
+  region = var.region-master
+}
+resource "aws_ecr_repository_policy" "demo-repo-policy" {
+  repository = aws_ecr_repository.images.name
+  policy     = <<EOF
+  {
+    "Version": "2008-10-17",
+    "Statement": [
+      {
+        "Sid": "adds full ecr access to the demo repository",
+        "Effect": "Allow",
+        "Principal": "*",
+        "Action": [
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:BatchGetImage",
+          "ecr:CompleteLayerUpload",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:GetLifecyclePolicy",
+          "ecr:InitiateLayerUpload",
+          "ecr:PutImage",
+          "ecr:UploadLayerPart"
+        ]
+      }
+    ]
+  }
+  EOF
+}
+
+provider "aws" {
+  region = var.region-worker
+
+}
+resource "aws_ecr_repository_policy" "demo-repo-policy" {
+  repository = aws_ecr_repository.demo-repository.name
+  policy     = <<EOF
+  {
+    "Version": "2008-10-17",
+    "Statement": [
+      {
+        "Sid": "adds full ecr access to the images repository",
+        "Effect": "Allow",
+        "Principal": "*",
+        "Action": [
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:BatchGetImage",
+          "ecr:CompleteLayerUpload",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:GetLifecyclePolicy",
+          "ecr:InitiateLayerUpload",
+          "ecr:PutImage",
+          "ecr:UploadLayerPart"
+        ]
+      }
+    ]
+  }
