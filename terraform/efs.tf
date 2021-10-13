@@ -3,5 +3,6 @@ resource "aws_efs_file_system" "dev" {
   provider  = aws.region-master
   tags = {
     Name = "keys"
+
   }
 }
