@@ -856,8 +856,9 @@ resource "aws_efs_file_system" "dev" {
 #+end_src
 **** [[./terraform/ecr.tf]]
 :PROPERTIES:
-:header-args: :tangle terraform/ecr.tf
+:header-args: :tangle no
 :END:
+:header-args: :tangle terraform/ecr.tf
 #+begin_src json
 resource "aws_ecr_repository" "images" {
   name                 = "docker_images"
