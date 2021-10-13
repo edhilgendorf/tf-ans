@@ -844,7 +844,7 @@ resource "aws_efs_file_system" "dev" {
 :CUSTOM_ID: -create-infrastructure-with-terraform-ecs-for-awx-
 :END:
 - An Amazon ECS service allows you to run and maintain a specified number of instances of a task definition simultaneously in an Amazon ECS cluster. If any of your tasks should fail or stop for any reason, the Amazon ECS service scheduler launches another instance of your task definition to replace it in order to maintain the desired number of tasks in the service.
-*** ECR
+*** ECR :ecr:
 - Need to create an ECR to store our [[#-configuration-management-with-ansible-awx-][AWX]] image.
 **** [[./terraform/ecr.tf]]
 :PROPERTIES:
@@ -854,13 +854,14 @@ resource "aws_efs_file_system" "dev" {
 resource "aws_ecr_repository" "images" {
   name                 = "docker_images"
   image_tag_mutability = "MUTABLE"
+  region = var.region-master
 
   image_scanning_configuration {
     scan_on_push = true
   }
 }
 #+end_src
-*** ECS _untangled_
+*** ECS _untangled_ :ecs:
 **** [[./terraform/policies/terraform_user.json]]
 :PROPERTIES:
 :header-args: :tangle terraform/policies/terraform_user.json
