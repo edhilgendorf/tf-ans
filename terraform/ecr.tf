@@ -1,6 +1,6 @@
 provider "aws" {
   region = var.region-master
-  
+
 }
 resource "aws_ecr_repository" "images" {
   name                 = "docker_images"
