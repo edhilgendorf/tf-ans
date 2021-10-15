@@ -2,7 +2,7 @@ provider "aws" {
   region = var.region-master
 
 }
-resource "aws_ecr_repository" "images" {
+resource "aws_ecr_repository" "docker_images" {
   name                 = "docker_images"
   image_tag_mutability = "MUTABLE"
 

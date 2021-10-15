@@ -7,7 +7,7 @@ resource "aws_ecs_task_definition" "my_first_task" {
   container_definitions    = <<DEFINITION
   [
     {
-        
+
       "name": "my-first-task",
       "image": "${aws_ecr_repository.docker_images.repository_url}",
       "essential": true,
