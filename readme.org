@@ -863,9 +863,9 @@ provider "aws" {
   region = var.region-master
 
 }
-resource "aws_ecr_repository" "images" {
+resource "aws_ecr_repository" "docker_images" {
   name                 = "docker_images"
-  image_tag_mutability = "MUTABLE"
+#  image_tag_mutability = "MUTABLE"
 
   image_scanning_configuration {
     scan_on_push = true
@@ -878,7 +878,8 @@ resource "aws_ecr_repository" "images" {
 :END:
 #+begin_src json
 resource "aws_ecr_repository_policy" "demo-repo-policy" {
-  repository = aws_ecr_repository.images.name
+  repository = aws_ecr_repository.docker_images.name
+    
   policy     = <<EOF
   {
     "Version": "2008-10-17",
@@ -940,6 +941,7 @@ resource "aws_ecs_task_definition" "my_first_task" {
   container_definitions    = <<DEFINITION
   [
     {
+
       "name": "my-first-task",
       "image": "${aws_ecr_repository.docker_images.repository_url}",
       "essential": true,
@@ -959,6 +961,10 @@ resource "aws_ecs_task_definition" "my_first_task" {
   memory                   = 512         # Specifying the memory our container requires
   cpu                      = 256         # Specifying the CPU our container requires
   execution_role_arn       = "${aws_iam_role.ecsTaskExecutionRole.arn}"
+
+  depends_on = [
+   aws_ecr_repository.docker_images,
+  ]
 }
 
 resource "aws_iam_role" "ecsTaskExecutionRole" {
