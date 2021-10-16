@@ -12,7 +12,7 @@ resource "aws_ecr_repository" "docker_images" {
 }
 
 resource "aws_ecr_repository_policy" "demo-repo-policy" {
-  repository = aws_ecr_repository.images.name
+  repository = aws_ecr_repository.docker_images.name
   policy     = <<EOF
   {
     "Version": "2008-10-17",
