@@ -65,7 +65,6 @@ resource "aws_ecs_service" "my_first_service" {
     target_group_arn = "${aws_lb_target_group.target_group.arn}" # Referencing our target group
     container_name   = "${aws_ecs_task_definition.my_first_task.family}"
     container_port   = 3000 # Specifying the container port
-    depends_on = [aws_lb_target_group.target_group,aws_lb_listener.listener]
   }
   network_configuration {
     subnets          = ["${aws_subnet.subnet_1.id}"]
