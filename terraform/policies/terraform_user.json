@@ -102,10 +102,6 @@
         "iam:*",
         "s3:PutObject"
 
-        "ecr:*",
-
-        "elasticfilesystem:*",
-
       ],
       "Effect": "Allow",
       "Resource": "*"
