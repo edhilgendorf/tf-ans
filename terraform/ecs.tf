@@ -62,7 +62,7 @@ resource "aws_ecs_service" "my_first_service" {
   desired_count   = 3 # Setting the number of containers we want deployed to 3
 
   network_configuration {
-    subnets          = aws_subnet.subnet_1
+    subnet          = aws_subnet.subnet_1
     assign_public_ip = true # Providing our containers with public IPs
   }
 }
