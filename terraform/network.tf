@@ -126,7 +126,7 @@ resource "aws_main_route_table_association" "set-worker-default-rt-assoc" {
 resource "aws_alb" "application_load_balancer" {
   name               = "test-lb-tf" # Naming our load balancer
   load_balancer_type = "application"
-  subnets = ["${aws_subnet.subnet_1.id}", "${aws_subnet.subnet_1_oregon}"]
+  subnets = ["${aws_subnet.subnet_1.id}", "${aws_subnet.subnet_1_oregon.id}"]
   # Referencing the security group
   security_groups = ["${aws_security_group.load_balancer_security_group.id}"]
 }
