@@ -70,4 +70,5 @@ resource "aws_ecs_service" "my_first_service" {
     subnets          = ["${aws_subnet.subnet_1.id}"]
     assign_public_ip = true # Providing our containers with public IPs
   }
+  depends_on = [aws_lb_target_group.target_group,aws_lb_listener.listener]
 }
